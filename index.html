@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>esc</title>
 
-  <!-- Fonts from Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Roboto+Mono&display=swap" rel="stylesheet">
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700&family=Roboto+Mono&display=swap" rel="stylesheet">
 
-  <!-- Favicon / Site Thumbnail -->
+  <!-- Favicon -->
   <link rel="icon" href="logo1-512-nobg.png" type="image/png" />
 
   <style>
@@ -16,25 +16,45 @@
       margin: 0;
       background-color: #000;
       color: #fff;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Nunito Sans', sans-serif;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
       height: 100vh;
       padding: 20px;
       text-align: center;
+      overflow: hidden;
     }
 
     img {
-      max-width: 220px;
-      margin-bottom: 40px;
+      height: 60vh;
+      width: auto;
+      margin-bottom: 30px;
     }
 
-    h1 {
+    .line {
       font-size: 2em;
       letter-spacing: 2px;
+      display: inline-block;
+      white-space: pre;
       margin: 0.3em 0;
+    }
+
+    .line span {
+      display: inline-block;
+      opacity: 0;
+      transform: translateX(-20px);
+      animation: letterIn 0.4s ease forwards;
+    }
+
+    .line1 span { animation-delay: calc(var(--i) * 0.05s + 0.5s); }
+    .line2 span { animation-delay: calc(var(--i) * 0.05s + 1.5s); }
+
+    @keyframes letterIn {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
 
     .email {
@@ -48,9 +68,15 @@
 </head>
 <body>
   <img src="logo1-512-nobg.png" alt="Logo" />
-  <h1>Something exciting,</h1>
-  <h1>in the making.</h1>
 
-  <div class="email">info@esc.gs</div>
+  <div class="line line1">
+    <span style="--i:0">S</span><span style="--i:1">o</span><span style="--i:2">m</span><span style="--i:3">e</span><span style="--i:4">t</span><span style="--i:5">h</span><span style="--i:6">i</span><span style="--i:7">n</span><span style="--i:8">g</span><span style="--i:9"> </span><span style="--i:10">e</span><span style="--i:11">x</span><span style="--i:12">c</span><span style="--i:13">i</span><span style="--i:14">t</span><span style="--i:15">i</span><span style="--i:16">n</span><span style="--i:17">g</span><span style="--i:18">,</span>
+  </div>
+
+  <div class="line line2">
+    <span style="--i:0">i</span><span style="--i:1">n</span><span style="--i:2"> </span><span style="--i:3">t</span><span style="--i:4">h</span><span style="--i:5">e</span><span style="--i:6"> </span><span style="--i:7">m</span><span style="--i:8">a</span><span style="--i:9">k</span><span style="--i:10">i</span><span style="--i:11">n</span><span style="--i:12">g</span><span style="--i:13">.</span>
+  </div>
+
+  <div class="email">hello@escdomain.com</div>
 </body>
 </html>
