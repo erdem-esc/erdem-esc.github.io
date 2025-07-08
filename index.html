@@ -24,7 +24,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 30vh;
+      height: 50vh;
       padding-top: 20px;
     }
 
@@ -34,19 +34,34 @@
     }
 
     .video-crop {
-      width: 100%;
       height: 50vh;
       overflow: hidden;
       position: relative;
+      margin: 0 auto;
     }
 
     .video-crop video {
       position: absolute;
       top: -25%;
-      left: 0;
       width: 100%;
       height: 150%;
       object-fit: cover;
+    }
+
+    /* Desktop-specific video width and positioning */
+    @media (min-width: 601px) {
+      .video-crop {
+        width: 30vw;
+        margin-left: 10vw; /* push to the right by 10% */
+      }
+    }
+
+    /* Mobile: full width video */
+    @media (max-width: 600px) {
+      .video-crop {
+        width: 100%;
+        margin-left: 0;
+      }
     }
 
     .text-line {
@@ -74,11 +89,20 @@
       text-align: center;
       font-size: 0.9em;
       font-family: 'Roboto Mono', monospace;
-      color: #aaa;
       padding: 10px 0 30px;
     }
 
-    /* Mobile adjustments */
+    .email a {
+      color: #444; /* dark gray */
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .email a:hover,
+    .email a:active {
+      color: #ccc; /* light gray on hover/click */
+    }
+
     @media (max-width: 600px) {
       .text-line {
         font-size: 1.4em;
@@ -86,14 +110,9 @@
         padding-top: 30px;
       }
 
-      .email a {
-        color: #aaa;
-        text-decoration: none;
-      }
-
-      .email a:hover {
-        color: #fff;
-        text-decoration: underline;
+      .email {
+        font-size: 0.8em;
+        padding-bottom: 20px;
       }
     }
   </style>
@@ -104,7 +123,7 @@
     <img src="logo1-512-nobg.png" alt="Logo" />
   </div>
 
-  <!-- Cropped Video Section -->
+  <!-- Cropped & Positioned Video -->
   <div class="video-crop">
     <video autoplay muted loop playsinline>
       <source src="video.mp4" type="video/mp4" />
@@ -114,8 +133,8 @@
 
   <!-- Text -->
   <div class="text-line">
-    <!-- "Something exciting in the making." as single animated line -->
-    <span style="--i:0" data-i> S</span><span style="--i:1" data-i>o</span><span style="--i:2" data-i>m</span><span style="--i:3" data-i>e</span><span style="--i:4" data-i>t</span><span style="--i:5" data-i>h</span><span style="--i:6" data-i>i</span><span style="--i:7" data-i>n</span><span style="--i:8" data-i>g</span><span style="--i:9" data-i> </span><span style="--i:10" data-i>e</span><span style="--i:11" data-i>x</span><span style="--i:12" data-i>c</span><span style="--i:13" data-i>i</span><span style="--i:14" data-i>t</span><span style="--i:15" data-i>i</span><span style="--i:16" data-i>n</span><span style="--i:17" data-i>g</span><span style="--i:18" data-i> </span><span style="--i:19" data-i>i</span><span style="--i:20" data-i>n</span><span style="--i:21" data-i> </span><span style="--i:22" data-i>t</span><span style="--i:23" data-i>h</span><span style="--i:24" data-i>e</span><span style="--i:25" data-i> </span><span style="--i:26" data-i>m</span><span style="--i:27" data-i>a</span><span style="--i:28" data-i>k</span><span style="--i:29" data-i>i</span><span style="--i:30" data-i>n</span><span style="--i:31" data-i>g</span><span style="--i:32" data-i>.</span>
+    <!-- "Something exciting in the making." -->
+    <span style="--i:0" data-i>S</span><span style="--i:1" data-i>o</span><span style="--i:2" data-i>m</span><span style="--i:3" data-i>e</span><span style="--i:4" data-i>t</span><span style="--i:5" data-i>h</span><span style="--i:6" data-i>i</span><span style="--i:7" data-i>n</span><span style="--i:8" data-i>g</span><span style="--i:9" data-i> </span><span style="--i:10" data-i>e</span><span style="--i:11" data-i>x</span><span style="--i:12" data-i>c</span><span style="--i:13" data-i>i</span><span style="--i:14" data-i>t</span><span style="--i:15" data-i>i</span><span style="--i:16" data-i>n</span><span style="--i:17" data-i>g</span><span style="--i:18" data-i> </span><span style="--i:19" data-i>i</span><span style="--i:20" data-i>n</span><span style="--i:21" data-i> </span><span style="--i:22" data-i>t</span><span style="--i:23" data-i>h</span><span style="--i:24" data-i>e</span><span style="--i:25" data-i> </span><span style="--i:26" data-i>m</span><span style="--i:27" data-i>a</span><span style="--i:28" data-i>k</span><span style="--i:29" data-i>i</span><span style="--i:30" data-i>n</span><span style="--i:31" data-i>g</span><span style="--i:32" data-i>.</span>
   </div>
 
   <!-- Email -->
