@@ -32,28 +32,49 @@
       margin-bottom: 20px;
     }
 
-    .line {
+    .text-block {
       font-size: 2em;
       letter-spacing: 2px;
-      display: inline-block;
-      white-space: pre;
-      margin: 0;
-      line-height: 1.2;
+      line-height: 1;
     }
 
-    .line span {
+    .text-block span {
       display: inline-block;
       opacity: 0;
       animation: fadeIn 0.4s ease forwards;
     }
 
-    .line1 span { animation-delay: calc(var(--i) * 0.05s + 0.5s); }
-    .line2 span { animation-delay: calc(var(--i) * 0.05s + 1.5s); }
+    /* Letter animation delays */
+    .text-block span[data-line="1"] {
+      animation-delay: calc(var(--i) * 0.05s + 0.5s);
+    }
+
+    .text-block span[data-line="2"] {
+      animation-delay: calc(var(--i) * 0.05s + 1.5s);
+    }
 
     @keyframes fadeIn {
       to {
         opacity: 1;
       }
+    }
+
+    /* Blinking cursor after second line */
+    .cursor {
+      display: inline-block;
+      width: 1px;
+      height: 1em;
+      background: #fff;
+      margin-left: 4px;
+      animation: blink 1s step-end infinite;
+      opacity: 0;
+      animation-delay: 2.6s;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
     }
 
     .email {
@@ -63,17 +84,36 @@
       font-family: 'Roboto Mono', monospace;
       color: #aaa;
     }
+
+    /* 🔧 Mobile responsiveness */
+    @media (max-width: 600px) {
+      .text-block {
+        font-size: 1.4em;
+        letter-spacing: 1px;
+      }
+
+      img {
+        height: 40vh;
+        margin-bottom: 15px;
+      }
+
+      .email {
+        font-size: 0.8em;
+        padding-bottom: 15px;
+      }
+    }
   </style>
 </head>
 <body>
   <img src="logo1-512-nobg.png" alt="Logo" />
 
-  <div class="line line1">
-    <span style="--i:0">S</span><span style="--i:1">o</span><span style="--i:2">m</span><span style="--i:3">e</span><span style="--i:4">t</span><span style="--i:5">h</span><span style="--i:6">i</span><span style="--i:7">n</span><span style="--i:8">g</span><span style="--i:9"> </span><span style="--i:10">e</span><span style="--i:11">x</span><span style="--i:12">c</span><span style="--i:13">i</span><span style="--i:14">t</span><span style="--i:15">i</span><span style="--i:16">n</span><span style="--i:17">g</span><span style="--i:18">,</span>
-  </div>
-
-  <div class="line line2">
-    <span style="--i:0">i</span><span style="--i:1">n</span><span style="--i:2"> </span><span style="--i:3">t</span><span style="--i:4">h</span><span style="--i:5">e</span><span style="--i:6"> </span><span style="--i:7">m</span><span style="--i:8">a</span><span style="--i:9">k</span><span style="--i:10">i</span><span style="--i:11">n</span><span style="--i:12">g</span><span style="--i:13">.</span>
+  <div class="text-block">
+    <!-- Line 1 -->
+    <span style="--i:0" data-line="1">S</span><span style="--i:1" data-line="1">o</span><span style="--i:2" data-line="1">m</span><span style="--i:3" data-line="1">e</span><span style="--i:4" data-line="1">t</span><span style="--i:5" data-line="1">h</span><span style="--i:6" data-line="1">i</span><span style="--i:7" data-line="1">n</span><span style="--i:8" data-line="1">g</span><span style="--i:9" data-line="1"> </span><span style="--i:10" data-line="1">e</span><span style="--i:11" data-line="1">x</span><span style="--i:12" data-line="1">c</span><span style="--i:13" data-line="1">i</span><span style="--i:14" data-line="1">t</span><span style="--i:15" data-line="1">i</span><span style="--i:16" data-line="1">n</span><span style="--i:17" data-line="1">g</span><span style="--i:18" data-line="1">,</span>
+    <br/>
+    <!-- Line 2 -->
+    <span style="--i:0" data-line="2">i</span><span style="--i:1" data-line="2">n</span><span style="--i:2" data-line="2"> </span><span style="--i:3" data-line="2">t</span><span style="--i:4" data-line="2">h</span><span style="--i:5" data-line="2">e</span><span style="--i:6" data-line="2"> </span><span style="--i:7" data-line="2">m</span><span style="--i:8" data-line="2">a</span><span style="--i:9" data-line="2">k</span><span style="--i:10" data-line="2">i</span><span style="--i:11" data-line="2">n</span><span style="--i:12" data-line="2">g</span><span style="--i:13" data-line="2">.</span>
+    <span class="cursor"></span>
   </div>
 
   <div class="email">hello@escdomain.com</div>
