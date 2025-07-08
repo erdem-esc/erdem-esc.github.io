@@ -23,25 +23,17 @@
       align-items: center;
     }
 
-    .text-line {
-      font-size: 2em;
-      letter-spacing: 1.5px;
-      padding: 30px 20px 10px;
-      text-align: center;
+    .logo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 30vh;
+      padding-top: 20px;
     }
 
-    .text-line span {
-      display: inline-block;
-      opacity: 0;
-      animation: fadeIn 0.4s ease forwards;
-    }
-
-    .text-line span[data-i] {
-      animation-delay: calc(var(--i) * 0.05s + 0.3s);
-    }
-
-    @keyframes fadeIn {
-      to { opacity: 1; }
+    .logo img {
+      height: 100%;
+      width: auto;
     }
 
     .video-wrapper {
@@ -61,25 +53,27 @@
       .video-wrapper video {
         width: 100vw;
       }
-
-      .text-line {
-        font-size: 1.4em;
-        letter-spacing: 1px;
-        padding-top: 20px;
-      }
     }
 
-    .logo {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 30vh;
-      margin-top: 10px;
+    .text-block {
+      font-size: 2em;
+      letter-spacing: 2px;
+      text-align: center;
+      line-height: 1.2;
+      padding: 20px;
     }
 
-    .logo img {
-      height: 100%;
-      width: auto;
+    .text-block span {
+      display: inline-block;
+      opacity: 0;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    .text-block .line1 span { animation-delay: calc(var(--i) * 0.05s + 0.5s); }
+    .text-block .line2 span { animation-delay: calc(var(--i) * 0.05s + 1.5s); }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
     }
 
     .email {
@@ -90,27 +84,34 @@
     }
 
     .email a {
-      color: #444;
+      color: #ccc; /* light gray initially */
       text-decoration: none;
       transition: color 0.3s ease;
     }
 
     .email a:hover,
     .email a:active {
-      color: #ccc;
+      color: #444; /* dark gray on hover/click */
+    }
+
+    @media (max-width: 600px) {
+      .text-block {
+        font-size: 1.4em;
+        letter-spacing: 1px;
+      }
+
+      .email {
+        font-size: 0.8em;
+        padding-bottom: 20px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- Text -->
-  <div class="text-line">
-    <!-- Proper spacing + full sentence -->
-    <span style="--i:0" data-i>S</span><span style="--i:1" data-i>o</span><span style="--i:2" data-i>m</span><span style="--i:3" data-i>e</span><span style="--i:4" data-i>t</span><span style="--i:5" data-i>h</span><span style="--i:6" data-i>i</span><span style="--i:7" data-i>n</span><span style="--i:8" data-i>g</span><span style="--i:9" data-i> </span>
-    <span style="--i:10" data-i>e</span><span style="--i:11" data-i>x</span><span style="--i:12" data-i>c</span><span style="--i:13" data-i>i</span><span style="--i:14" data-i>t</span><span style="--i:15" data-i>i</span><span style="--i:16" data-i>n</span><span style="--i:17" data-i>g</span><span style="--i:18" data-i>,</span><span style="--i:19" data-i> </span>
-    <span style="--i:20" data-i>i</span><span style="--i:21" data-i>n</span><span style="--i:22" data-i> </span>
-    <span style="--i:23" data-i>t</span><span style="--i:24" data-i>h</span><span style="--i:25" data-i>e</span><span style="--i:26" data-i> </span>
-    <span style="--i:27" data-i>m</span><span style="--i:28" data-i>a</span><span style="--i:29" data-i>k</span><span style="--i:30" data-i>i</span><span style="--i:31" data-i>n</span><span style="--i:32" data-i>g</span><span style="--i:33" data-i>.</span>
+  <!-- Logo -->
+  <div class="logo">
+    <img src="logo1-512-nobg.png" alt="Logo" />
   </div>
 
   <!-- Video -->
@@ -121,9 +122,14 @@
     </video>
   </div>
 
-  <!-- Logo -->
-  <div class="logo">
-    <img src="logo1-512-nobg.png" alt="Logo" />
+  <!-- Text -->
+  <div class="text-block">
+    <div class="line1">
+      <span style="--i:0">S</span><span style="--i:1">o</span><span style="--i:2">m</span><span style="--i:3">e</span><span style="--i:4">t</span><span style="--i:5">h</span><span style="--i:6">i</span><span style="--i:7">n</span><span style="--i:8">g</span><span style="--i:9"> </span><span style="--i:10">e</span><span style="--i:11">x</span><span style="--i:12">c</span><span style="--i:13">i</span><span style="--i:14">t</span><span style="--i:15">i</span><span style="--i:16">n</span><span style="--i:17">g</span><span style="--i:18">,</span>
+    </div>
+    <div class="line2">
+      <span style="--i:0">i</span><span style="--i:1">n</span><span style="--i:2"> </span><span style="--i:3">t</span><span style="--i:4">h</span><span style="--i:5">e</span><span style="--i:6"> </span><span style="--i:7">m</span><span style="--i:8">a</span><span style="--i:9">k</span><span style="--i:10">i</span><span style="--i:11">n</span><span style="--i:12">g</span><span style="--i:13">.</span>
+    </div>
   </div>
 
   <!-- Email -->
