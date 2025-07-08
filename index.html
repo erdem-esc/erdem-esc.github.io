@@ -14,70 +14,92 @@
   <style>
     body {
       margin: 0;
+      background-color: #000;
+      color: #fff;
       font-family: 'Nunito Sans', sans-serif;
-      color: white;
-      height: 100vh;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      text-align: center;
+      height: 100vh;
       padding: 20px;
-      background: linear-gradient(-45deg, #000000, #1a1a1a, #333333, #000000);
-      background-size: 400% 400%;
-      animation: gradientBG 15s ease infinite;
-    }
-
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
-    img {
-      height: 50vh;
-      width: auto;
-      margin-bottom: 30px;
-    }
-
-    .typewriter {
-      font-size: 2em;
-      white-space: pre-line;
-      border-right: 2px solid white;
-      width: fit-content;
-      margin: 0 auto;
-      font-family: 'Nunito Sans', sans-serif;
-      animation: blinkCursor 1s steps(1) infinite;
+      text-align: center;
       overflow: hidden;
     }
 
-    @keyframes blinkCursor {
-      0%, 100% { border-color: transparent; }
-      50% { border-color: white; }
+    img {
+      height: 60vh;
+      width: auto;
+      margin-bottom: 20px;
+    }
+
+    .text-block {
+      font-size: 2em;
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+
+    .text-block span {
+      display: inline-block;
+      opacity: 0;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    /* Letter animation delays */
+    .text-block span[data-line="1"] {
+      animation-delay: calc(var(--i) * 0.05s + 0.5s);
+    }
+
+    .text-block span[data-line="2"] {
+      animation-delay: calc(var(--i) * 0.05s + 1.5s);
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Blinking cursor after second line */
+    .cursor {
+      display: inline-block;
+      width: 1px;
+      height: 1em;
+      background: #fff;
+      margin-left: 4px;
+      animation: blink 1s step-end infinite;
+      opacity: 0;
+      animation-delay: 2.6s;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
     }
 
     .email {
       margin-top: auto;
-      padding-top: 30px;
+      padding: 20px 0;
       font-size: 0.9em;
       font-family: 'Roboto Mono', monospace;
       color: #aaa;
     }
 
-    /* Mobile scaling */
+    /* 🔧 Mobile responsiveness */
     @media (max-width: 600px) {
-      .typewriter {
+      .text-block {
         font-size: 1.4em;
+        letter-spacing: 1px;
       }
 
       img {
-        height: 35vh;
+        height: 40vh;
+        margin-bottom: 15px;
       }
 
       .email {
         font-size: 0.8em;
-        padding-bottom: 10px;
+        padding-bottom: 15px;
       }
     }
   </style>
@@ -85,23 +107,15 @@
 <body>
   <img src="logo1-512-nobg.png" alt="Logo" />
 
-  <div id="typewriter" class="typewriter"></div>
+  <div class="text-block">
+    <!-- Line 1 -->
+    <span style="--i:0" data-line="1">S</span><span style="--i:1" data-line="1">o</span><span style="--i:2" data-line="1">m</span><span style="--i:3" data-line="1">e</span><span style="--i:4" data-line="1">t</span><span style="--i:5" data-line="1">h</span><span style="--i:6" data-line="1">i</span><span style="--i:7" data-line="1">n</span><span style="--i:8" data-line="1">g</span><span style="--i:9" data-line="1"> </span><span style="--i:10" data-line="1">e</span><span style="--i:11" data-line="1">x</span><span style="--i:12" data-line="1">c</span><span style="--i:13" data-line="1">i</span><span style="--i:14" data-line="1">t</span><span style="--i:15" data-line="1">i</span><span style="--i:16" data-line="1">n</span><span style="--i:17" data-line="1">g</span><span style="--i:18" data-line="1">,</span>
+    <br/>
+    <!-- Line 2 -->
+    <span style="--i:0" data-line="2">i</span><span style="--i:1" data-line="2">n</span><span style="--i:2" data-line="2"> </span><span style="--i:3" data-line="2">t</span><span style="--i:4" data-line="2">h</span><span style="--i:5" data-line="2">e</span><span style="--i:6" data-line="2"> </span><span style="--i:7" data-line="2">m</span><span style="--i:8" data-line="2">a</span><span style="--i:9" data-line="2">k</span><span style="--i:10" data-line="2">i</span><span style="--i:11" data-line="2">n</span><span style="--i:12" data-line="2">g</span><span style="--i:13" data-line="2">.</span>
+    <span class="cursor"></span>
+  </div>
 
-  <div class="email">info@esc.gs</div>
-
-  <script>
-    const text = "Something exciting,\nin the making.";
-    const typewriter = document.getElementById("typewriter");
-
-    let i = 0;
-    function type() {
-      if (i <= text.length) {
-        typewriter.textContent = text.slice(0, i);
-        i++;
-        setTimeout(type, 60); // Typing speed
-      }
-    }
-    setTimeout(type, 500); // Initial delay
-  </script>
+  <div class="email">hello@escdomain.com</div>
 </body>
 </html>
