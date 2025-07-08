@@ -14,108 +14,113 @@
   <style>
     body {
       margin: 0;
+      font-family: 'Nunito Sans', sans-serif;
       background-color: #000;
       color: #fff;
-      font-family: 'Nunito Sans', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .logo {
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      height: 100vh;
-      padding: 20px;
-      text-align: center;
-      overflow: hidden;
+      height: 30vh;
+      padding-top: 20px;
     }
 
-    img {
-      height: 60vh;
+    .logo img {
+      height: 100%;
       width: auto;
-      margin-bottom: 20px;
     }
 
-    .text-block {
+    .video-crop {
+      width: 100%;
+      height: 50vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .video-crop video {
+      position: absolute;
+      top: -25%;
+      left: 0;
+      width: 100%;
+      height: 150%;
+      object-fit: cover;
+    }
+
+    .text-line {
       font-size: 2em;
       letter-spacing: 2px;
-      line-height: 1;
+      text-align: center;
+      padding: 40px 20px 10px;
     }
 
-    .text-block span {
+    .text-line span {
       display: inline-block;
       opacity: 0;
       animation: fadeIn 0.4s ease forwards;
     }
 
-    /* Letter animation delays */
-    .text-block span[data-line="1"] {
+    .text-line span[data-i] {
       animation-delay: calc(var(--i) * 0.05s + 0.5s);
     }
 
-    .text-block span[data-line="2"] {
-      animation-delay: calc(var(--i) * 0.05s + 1.5s);
-    }
-
     @keyframes fadeIn {
-      to {
-        opacity: 1;
-      }
-    }
-
-    /* Blinking cursor after second line */
-    .cursor {
-      display: inline-block;
-      width: 1px;
-      height: 1em;
-      background: #fff;
-      margin-left: 4px;
-      animation: blink 1s step-end infinite;
-      opacity: 0;
-      animation-delay: 2.6s;
-      animation-fill-mode: forwards;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
+      to { opacity: 1; }
     }
 
     .email {
-      margin-top: auto;
-      padding: 20px 0;
+      text-align: center;
       font-size: 0.9em;
       font-family: 'Roboto Mono', monospace;
       color: #aaa;
+      padding: 10px 0 30px;
     }
 
-    /* 🔧 Mobile responsiveness */
+    /* Mobile adjustments */
     @media (max-width: 600px) {
-      .text-block {
+      .text-line {
         font-size: 1.4em;
         letter-spacing: 1px;
+        padding-top: 30px;
       }
 
-      img {
-        height: 40vh;
-        margin-bottom: 15px;
+      .email a {
+        color: #aaa;
+        text-decoration: none;
       }
 
-      .email {
-        font-size: 0.8em;
-        padding-bottom: 15px;
+      .email a:hover {
+        color: #fff;
+        text-decoration: underline;
       }
     }
   </style>
 </head>
 <body>
-  <img src="logo1-512-nobg.png" alt="Logo" />
-
-  <div class="text-block">
-    <!-- Line 1 -->
-    <span style="--i:0" data-line="1">S</span><span style="--i:1" data-line="1">o</span><span style="--i:2" data-line="1">m</span><span style="--i:3" data-line="1">e</span><span style="--i:4" data-line="1">t</span><span style="--i:5" data-line="1">h</span><span style="--i:6" data-line="1">i</span><span style="--i:7" data-line="1">n</span><span style="--i:8" data-line="1">g</span><span style="--i:9" data-line="1"> </span><span style="--i:10" data-line="1">e</span><span style="--i:11" data-line="1">x</span><span style="--i:12" data-line="1">c</span><span style="--i:13" data-line="1">i</span><span style="--i:14" data-line="1">t</span><span style="--i:15" data-line="1">i</span><span style="--i:16" data-line="1">n</span><span style="--i:17" data-line="1">g</span><span style="--i:18" data-line="1">,</span>
-    <br/>
-    <!-- Line 2 -->
-    <span style="--i:0" data-line="2">i</span><span style="--i:1" data-line="2">n</span><span style="--i:2" data-line="2"> </span><span style="--i:3" data-line="2">t</span><span style="--i:4" data-line="2">h</span><span style="--i:5" data-line="2">e</span><span style="--i:6" data-line="2"> </span><span style="--i:7" data-line="2">m</span><span style="--i:8" data-line="2">a</span><span style="--i:9" data-line="2">k</span><span style="--i:10" data-line="2">i</span><span style="--i:11" data-line="2">n</span><span style="--i:12" data-line="2">g</span><span style="--i:13" data-line="2">.</span>
-    <span class="cursor"></span>
+  <!-- Logo -->
+  <div class="logo">
+    <img src="logo1-512-nobg.png" alt="Logo" />
   </div>
 
-  <div class="email">hello@escdomain.com</div>
+  <!-- Cropped Video Section -->
+  <div class="video-crop">
+    <video autoplay muted loop playsinline>
+      <source src="video.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <!-- Text -->
+  <div class="text-line">
+    <!-- "Something exciting in the making." as single animated line -->
+    <span style="--i:0" data-i> S</span><span style="--i:1" data-i>o</span><span style="--i:2" data-i>m</span><span style="--i:3" data-i>e</span><span style="--i:4" data-i>t</span><span style="--i:5" data-i>h</span><span style="--i:6" data-i>i</span><span style="--i:7" data-i>n</span><span style="--i:8" data-i>g</span><span style="--i:9" data-i> </span><span style="--i:10" data-i>e</span><span style="--i:11" data-i>x</span><span style="--i:12" data-i>c</span><span style="--i:13" data-i>i</span><span style="--i:14" data-i>t</span><span style="--i:15" data-i>i</span><span style="--i:16" data-i>n</span><span style="--i:17" data-i>g</span><span style="--i:18" data-i> </span><span style="--i:19" data-i>i</span><span style="--i:20" data-i>n</span><span style="--i:21" data-i> </span><span style="--i:22" data-i>t</span><span style="--i:23" data-i>h</span><span style="--i:24" data-i>e</span><span style="--i:25" data-i> </span><span style="--i:26" data-i>m</span><span style="--i:27" data-i>a</span><span style="--i:28" data-i>k</span><span style="--i:29" data-i>i</span><span style="--i:30" data-i>n</span><span style="--i:31" data-i>g</span><span style="--i:32" data-i>.</span>
+  </div>
+
+  <!-- Email -->
+  <div class="email">
+    <a href="mailto:info@esc.gs">info@esc.gs</a>
+  </div>
 </body>
 </html>
