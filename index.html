@@ -28,7 +28,7 @@
       justify-content: center;
       align-items: center;
       height: 30vh;
-      margin: 0; /* No space below */
+      margin: 0;
     }
 
     .logo img {
@@ -36,31 +36,12 @@
       width: auto;
     }
 
-    .video-wrapper {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      margin: 0; /* No space above or below */
-    }
-
-    .video-wrapper video {
-      width: 100vw;
-      height: auto;
-      object-fit: cover;
-    }
-
-    @media (max-width: 600px) {
-      .video-wrapper video {
-        width: 100vw;
-      }
-    }
-
     .text-block {
       font-size: 2em;
       letter-spacing: 2px;
       text-align: center;
       line-height: 1.2;
-      padding: 10px 20px 5px; /* Minimal spacing */
+      padding: 10px 20px 30px; /* Added space below text */
     }
 
     .text-block span {
@@ -76,11 +57,29 @@
       to { opacity: 1; }
     }
 
+    .video-wrapper {
+      width: 100%;
+      height: 50vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      margin: 0;
+    }
+
+    .video-wrapper video {
+      width: 100vw;
+      height: auto;
+      position: relative;
+      top: -50%; /* Crop top 50% */
+      object-fit: cover;
+    }
+
     .email {
       text-align: center;
       font-size: 0.9em;
       font-family: 'Roboto Mono', monospace;
-      padding: 10px 0 20px;
+      padding: 20px 0 30px;
     }
 
     .email a {
@@ -100,6 +99,11 @@
         letter-spacing: 1px;
       }
 
+      .video-wrapper video {
+        width: 100vw;
+        top: -50%;
+      }
+
       .email {
         font-size: 0.8em;
         padding-bottom: 15px;
@@ -113,16 +117,17 @@
   <div class="logo">
     <img src="logo1-512-nobg.png" alt="Logo" />
   </div>
-  
+
   <!-- Text -->
   <div class="text-block">
     <div class="line1">
-      <!-- Proper spacing using actual space characters -->
-      <span style="--i:0">S</span><span style="--i:1">o</span><span style="--i:2">m</span><span style="--i:3">e</span><span style="--i:4">t</span><span style="--i:5">h</span><span style="--i:6">i</span><span style="--i:7">n</span><span style="--i:8">g</span><span style="--i:9"> </span>
-      <span style="--i:10">e</span><span style="--i:11">x</span><span style="--i:12">c</span><span style="--i:13">i</span><span style="--i:14">t</span><span style="--i:15">i</span><span style="--i:16">n</span><span style="--i:17">g</span><span style="--i:18">,</span><span style="--i:19"> </span>
-      <span style="--i:20">i</span><span style="--i:21">n</span><span style="--i:22"> </span>
-      <span style="--i:23">m</span><span style="--i:24">a</span><span style="--i:25">k</span><span style="--i:26">i</span><span style="--i:27">n</span><span style="--i:28">g</span><span style="--i:29">.</span>
-      <span style="--i:30">t</span><span style="--i:31">h</span><span style="--i:32">e</span><span style="--i:33"> </span>
+      <span style="--i:0">S</span><span style="--i:1">o</span><span style="--i:2">m</span><span style="--i:3">e</span><span style="--i:4">t</span><span style="--i:5">h</span><span style="--i:6">i</span><span style="--i:7">n</span><span style="--i:8">g</span><span style="--i:9">&nbsp;</span>
+      <span style="--i:10">e</span><span style="--i:11">x</span><span style="--i:12">c</span><span style="--i:13">i</span><span style="--i:14">t</span><span style="--i:15">i</span><span style="--i:16">n</span><span style="--i:17">g</span><span style="--i:18">,</span>
+    </div>
+    <div class="line2">
+      <span style="--i:0">i</span><span style="--i:1">n</span><span style="--i:2">&nbsp;</span>
+      <span style="--i:3">t</span><span style="--i:4">h</span><span style="--i:5">e</span><span style="--i:6">&nbsp;</span>
+      <span style="--i:7">m</span><span style="--i:8">a</span><span style="--i:9">k</span><span style="--i:10">i</span><span style="--i:11">n</span><span style="--i:12">g</span><span style="--i:13">.</span>
     </div>
   </div>
 
