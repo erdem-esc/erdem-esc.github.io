@@ -28,7 +28,7 @@
       justify-content: center;
       align-items: center;
       height: 30vh;
-      padding-top: 20px;
+      margin: 0; /* No space below */
     }
 
     .logo img {
@@ -37,10 +37,10 @@
     }
 
     .video-wrapper {
-      margin: 20px 0;
       width: 100%;
       display: flex;
       justify-content: center;
+      margin: 0; /* No space above or below */
     }
 
     .video-wrapper video {
@@ -60,7 +60,7 @@
       letter-spacing: 2px;
       text-align: center;
       line-height: 1.2;
-      padding: 20px;
+      padding: 10px 20px 5px; /* Minimal spacing */
     }
 
     .text-block span {
@@ -80,11 +80,11 @@
       text-align: center;
       font-size: 0.9em;
       font-family: 'Roboto Mono', monospace;
-      padding: 20px 0 30px;
+      padding: 10px 0 20px;
     }
 
     .email a {
-      color: #ccc; /* light gray initially */
+      color: #ccc; /* light gray */
       text-decoration: none;
       transition: color 0.3s ease;
     }
@@ -102,7 +102,7 @@
 
       .email {
         font-size: 0.8em;
-        padding-bottom: 20px;
+        padding-bottom: 15px;
       }
     }
   </style>
@@ -125,10 +125,13 @@
   <!-- Text -->
   <div class="text-block">
     <div class="line1">
-      <span style="--i:0">S</span><span style="--i:1">o</span><span style="--i:2">m</span><span style="--i:3">e</span><span style="--i:4">t</span><span style="--i:5">h</span><span style="--i:6">i</span><span style="--i:7">n</span><span style="--i:8">g</span><span style="--i:9"> </span><span style="--i:10">e</span><span style="--i:11">x</span><span style="--i:12">c</span><span style="--i:13">i</span><span style="--i:14">t</span><span style="--i:15">i</span><span style="--i:16">n</span><span style="--i:17">g</span><span style="--i:18">,</span>
+      <!-- Proper spacing using actual space characters -->
+      <span style="--i:0">S</span><span style="--i:1">o</span><span style="--i:2">m</span><span style="--i:3">e</span><span style="--i:4">t</span><span style="--i:5">h</span><span style="--i:6">i</span><span style="--i:7">n</span><span style="--i:8">g</span><span style="--i:9"> </span>
+      <span style="--i:10">e</span><span style="--i:11">x</span><span style="--i:12">c</span><span style="--i:13">i</span><span style="--i:14">t</span><span style="--i:15">i</span><span style="--i:16">n</span><span style="--i:17">g</span><span style="--i:18">,</span>
     </div>
     <div class="line2">
-      <span style="--i:0">i</span><span style="--i:1">n</span><span style="--i:2"> </span><span style="--i:3">t</span><span style="--i:4">h</span><span style="--i:5">e</span><span style="--i:6"> </span><span style="--i:7">m</span><span style="--i:8">a</span><span style="--i:9">k</span><span style="--i:10">i</span><span style="--i:11">n</span><span style="--i:12">g</span><span style="--i:13">.</span>
+      <span style="--i:0">i</span><span style="--i:1">n</span><span style="--i:2"> </span><span style="--i:3">t</span><span style="--i:4">h</span><span style="--i:5">e</span><span style="--i:6"> </span>
+      <span style="--i:7">m</span><span style="--i:8">a</span><span style="--i:9">k</span><span style="--i:10">i</span><span style="--i:11">n</span><span style="--i:12">g</span><span style="--i:13">.</span>
     </div>
   </div>
 
