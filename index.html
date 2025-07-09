@@ -54,7 +54,7 @@
 
     .overlay img {
       height: 50vh;
-      margin-bottom: 20px;
+      margin-bottom: 0px;
     }
 
     .overlay h1 {
@@ -78,7 +78,7 @@
       color: #ccc;
     }
 
-    /* Mobile optimization */
+    /* Mobile-specific styling */
     @media (max-width: 600px) {
       .overlay {
         transform: translateY(-4vh);
@@ -100,6 +100,15 @@
       .email a {
         font-size: 0.85em;
       }
+
+      .mobile-break {
+        display: block;
+      }
+    }
+
+    /* Desktop: mobile-break stays hidden */
+    .mobile-break {
+      display: none;
     }
   </style>
 </head>
@@ -114,7 +123,7 @@
   <!-- Overlay Content -->
   <div class="overlay">
     <img src="logo1-512-nobg.png" alt="Logo" />
-    <h1>Something exciting, in the making.</h1>
+    <h1>Something exciting,<span class="mobile-break"></span> in the making.</h1>
     <div class="email">
       <a href="mailto:info@esc.gs">info@esc.gs</a>
     </div>
