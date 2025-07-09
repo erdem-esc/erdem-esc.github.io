@@ -49,7 +49,7 @@
       text-align: center;
       color: white;
       padding: 20px;
-      transform: translateY(-10vh);
+      transform: translateY(-15vh);
     }
 
     .overlay img {
@@ -57,12 +57,19 @@
       margin-bottom: 0px;
     }
 
-    .overlay h1 {
-      font-size: 2.5em;
-      margin-bottom: 20px;
+    h1 {
       font-family: 'Galindo', cursive;
       font-weight: normal;
-      white-space: nowrap;
+      margin-bottom: 20px;
+    }
+
+    .desktop-line {
+      display: block;
+      font-size: 2.5em;
+    }
+
+    .mobile-line {
+      display: none;
     }
 
     .email a {
@@ -90,24 +97,20 @@
         margin-bottom: 20px;
       }
 
-      .overlay h1 {
+      .desktop-line {
+        display: none;
+      }
+
+      .mobile-line {
+        display: block;
         font-size: 1.5em;
-        margin-bottom: 15px;
         line-height: 1.4;
-        white-space: normal;
+        margin-bottom: 15px;
       }
 
       .email a {
         font-size: 0.85em;
       }
-
-      .mobile-break {
-        display: inline;
-      }
-    }
-
-    .mobile-break {
-      display: none;
     }
   </style>
 </head>
@@ -122,10 +125,8 @@
   <!-- Overlay Content -->
   <div class="overlay">
     <img src="logo1-512-nobg.png" alt="Logo" />
-    <h1>
-      Something exciting,<br class="mobile-break" />
-      in the making.
-    </h1>
+    <h1 class="desktop-line">Something exciting, in the making.</h1>
+    <h1 class="mobile-line">Something exciting,<br>in the making.</h1>
     <div class="email">
       <a href="mailto:info@esc.gs">info@esc.gs</a>
     </div>
