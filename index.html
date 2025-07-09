@@ -49,7 +49,7 @@
       text-align: center;
       color: white;
       padding: 20px;
-      transform: translateY(-15vh);
+      transform: translateY(-10vh);
     }
 
     .overlay img {
@@ -102,11 +102,10 @@
       }
 
       .mobile-break {
-        display: block;
+        display: inline;
       }
     }
 
-    /* Desktop: mobile-break stays hidden */
     .mobile-break {
       display: none;
     }
@@ -123,7 +122,10 @@
   <!-- Overlay Content -->
   <div class="overlay">
     <img src="logo1-512-nobg.png" alt="Logo" />
-    <h1>Something exciting,<span class="mobile-break"></span> in the making.</h1>
+    <h1>
+      Something exciting,<br class="mobile-break" />
+      in the making.
+    </h1>
     <div class="email">
       <a href="mailto:info@esc.gs">info@esc.gs</a>
     </div>
