@@ -25,38 +25,38 @@
       background: black;
       color: #ccc;
       display: flex;
+      flex-direction: column;
+      justify-content: space-between; /* top logo, bottom table */
+      align-items: center;
+      padding: 20px 0;
+    }
+
+    .logo-container {
+      flex-grow: 1; /* allows logo to stay centered vertically */
+      display: flex;
       justify-content: center;
       align-items: center;
     }
 
-    .overlay {
-      width: 100%;
-      max-width: 1000px;
-      text-align: center;
-      padding: 20px;
-    }
-
-    .overlay img {
-      width: 50vw;         /* logo takes 50% of viewport width */
-      max-width: 400px;    /* never bigger than 400px */
-      height: auto;        /* maintain aspect ratio */
-      margin-bottom: 40px;
+    .logo-container img {
+      width: 50vw;
+      max-width: 400px;
+      height: auto;
     }
 
     /* Footer table */
     .footer-table {
-      margin-top: 20px;
       width: 100%;
       max-width: 600px;
       border-collapse: collapse;
       color: #ccc;
       font-size: 0.475em;
-      text-align: center; /* center all content */
+      text-align: center;
     }
 
     .footer-table td {
       padding: 10px 0;
-      text-align: center; /* center text within cells */
+      text-align: center;
     }
 
     .footer-table a {
@@ -72,10 +72,9 @@
 
     /* Mobile-specific styling */
     @media (max-width: 600px) {
-      .overlay img {
+      .logo-container img {
         width: 70vw;
         max-width: 250px;
-        margin-bottom: 30px;
       }
 
       .footer-table {
@@ -86,25 +85,25 @@
 </head>
 <body>
 
-  <!-- Overlay Content -->
-  <div class="overlay">
+  <!-- Logo centered -->
+  <div class="logo-container">
     <img src="logo1-2048-nobg.png" alt="Logo" />
-
-    <!-- Footer table -->
-    <table class="footer-table">
-      <tr>
-        <td><a href="mailto:info@esc.gs">Contact Us</a></td>
-        <td><a href="https://www.linkedin.com/company/escgames/">LinkedIn</a></td>
-      </tr>
-      <tr>
-        <td><a href="privacy.html">Privacy Policy</a></td>
-        <td><a href="terms.html">Terms of Use</a></td>
-      </tr>
-      <tr>
-        <td colspan="2">All rights reserved. © 2025 - ESC Games Yazılım A.Ş.</td>
-      </tr>
-    </table>
   </div>
+
+  <!-- Footer table anchored at bottom center -->
+  <table class="footer-table">
+    <tr>
+      <td><a href="mailto:info@esc.gs">Contact Us</a></td>
+      <td><a href="https://www.linkedin.com/company/escgames/">LinkedIn</a></td>
+    </tr>
+    <tr>
+      <td><a href="privacy.html">Privacy Policy</a></td>
+      <td><a href="terms.html">Terms of Use</a></td>
+    </tr>
+    <tr>
+      <td colspan="2">All rights reserved. © 2025 - ESC Games Yazılım A.Ş.</td>
+    </tr>
+  </table>
 
 </body>
 </html>
