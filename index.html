@@ -32,7 +32,7 @@
     }
 
     .logo-container {
-      flex-grow: 1; /* allows logo to stay centered vertically */
+      flex-grow: 1; /* keeps logo centered vertically */
       display: flex;
       justify-content: center;
       align-items: center;
@@ -50,13 +50,28 @@
       max-width: 600px;
       border-collapse: collapse;
       color: #ccc;
-      font-size: 0.475em;
-      text-align: center;
+      font-size: 0.95em; /* doubled from previous 0.475em */
     }
 
     .footer-table td {
       padding: 10px 0;
+      vertical-align: middle;
+    }
+
+    /* Column alignment */
+    .footer-table td.left {
+      text-align: right;
+      padding-right: 30px; /* spacing between columns */
+    }
+
+    .footer-table td.right {
+      text-align: left;
+      padding-left: 30px; /* spacing between columns */
+    }
+
+    .footer-table td.center {
       text-align: center;
+      padding-top: 10px;
     }
 
     .footer-table a {
@@ -78,7 +93,15 @@
       }
 
       .footer-table {
-        font-size: 0.425em;
+        font-size: 0.85em; /* slightly smaller for mobile */
+      }
+
+      .footer-table td.left,
+      .footer-table td.right,
+      .footer-table td.center {
+        text-align: center;
+        padding-left: 0;
+        padding-right: 0;
       }
     }
   </style>
@@ -93,15 +116,15 @@
   <!-- Footer table anchored at bottom center -->
   <table class="footer-table">
     <tr>
-      <td><a href="mailto:info@esc.gs">Contact Us</a></td>
-      <td><a href="https://www.linkedin.com/company/escgames/">LinkedIn</a></td>
+      <td class="left"><a href="mailto:info@esc.gs">Contact Us</a></td>
+      <td class="right"><a href="https://www.linkedin.com/company/escgames/">LinkedIn</a></td>
     </tr>
     <tr>
-      <td><a href="privacy.html">Privacy Policy</a></td>
-      <td><a href="terms.html">Terms of Use</a></td>
+      <td class="left"><a href="privacy.html">Privacy Policy</a></td>
+      <td class="right"><a href="terms.html">Terms of Use</a></td>
     </tr>
     <tr>
-      <td colspan="2">All rights reserved. © 2025 - ESC Games Yazılım A.Ş.</td>
+      <td colspan="2" class="center">All rights reserved. © 2025 - ESC Games Yazılım A.Ş.</td>
     </tr>
   </table>
 
