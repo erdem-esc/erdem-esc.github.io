@@ -38,51 +38,25 @@
 
     .overlay img {
       width: 50vw;         /* logo takes 50% of viewport width */
-      max-width: 400px;    /* but never bigger than 400px */
+      max-width: 400px;    /* never bigger than 400px */
       height: auto;        /* maintain aspect ratio */
-      margin-bottom: 20px;
-    }
-
-    h1 {
-      font-weight: normal;
-      margin-bottom: 20px;
-    }
-
-    .desktop-line {
-      display: block;
-      font-size: 1.25em;
-    }
-
-    .mobile-line {
-      display: none;
-      font-size: 0.75em;
-    }
-
-    .email a {
-      font-family: 'Roboto Mono', monospace;
-      font-size: 0.475em;
-      color: #ccc;
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-
-    .email a:hover,
-    .email a:active {
-      color: #fff;
+      margin-bottom: 40px;
     }
 
     /* Footer table */
     .footer-table {
-      margin-top: 40px;
-      width: 80%;
+      margin-top: 20px;
+      width: 100%;
       max-width: 600px;
       border-collapse: collapse;
       color: #ccc;
       font-size: 0.475em;
+      text-align: center; /* center all content */
     }
 
     .footer-table td {
-      padding: 5px 10px;
+      padding: 10px 0;
+      text-align: center; /* center text within cells */
     }
 
     .footer-table a {
@@ -96,46 +70,16 @@
       color: #fff;
     }
 
-    .footer-table .left {
-      text-align: left;
-    }
-
-    .footer-table .right {
-      text-align: right;
-    }
-
-    .footer-table .center {
-      text-align: center;
-    }
-
     /* Mobile-specific styling */
     @media (max-width: 600px) {
       .overlay img {
-        width: 70vw;        /* larger relative to mobile screen */
-        max-width: 250px;   /* but still limited */
-        margin-bottom: 20px;
-      }
-
-      .desktop-line {
-        display: none;
-      }
-
-      .mobile-line {
-        display: block;
-      }
-
-      .email a {
-        font-size: 0.425em;
+        width: 70vw;
+        max-width: 250px;
+        margin-bottom: 30px;
       }
 
       .footer-table {
         font-size: 0.425em;
-      }
-
-      .footer-table .left,
-      .footer-table .right,
-      .footer-table .center {
-        text-align: center;
       }
     }
   </style>
@@ -145,24 +89,19 @@
   <!-- Overlay Content -->
   <div class="overlay">
     <img src="logo1-2048-nobg.png" alt="Logo" />
-    <h1 class="desktop-line">Something exciting, in the making.</h1>
-    <h1 class="mobile-line">Something exciting,<br>in the making.</h1>
-    <div class="email">
-      <a href="mailto:info@esc.gs">info@esc.gs</a>
-    </div>
 
     <!-- Footer table -->
     <table class="footer-table">
       <tr>
-        <td class="left"><a href="mailto:info@esc.gs">Contact Us</a></td>
-        <td class="right"><a href="https://www.linkedin.com/company/escgames/">LinkedIn</a></td>
+        <td><a href="mailto:info@esc.gs">Contact Us</a></td>
+        <td><a href="https://www.linkedin.com/company/escgames/">LinkedIn</a></td>
       </tr>
       <tr>
-        <td class="left"><a href="privacy.html">Privacy Policy</a></td>
-        <td class="right"><a href="terms.html">Terms of Use</a></td>
+        <td><a href="privacy.html">Privacy Policy</a></td>
+        <td><a href="terms.html">Terms of Use</a></td>
       </tr>
       <tr>
-        <td colspan="2" class="center">All rights reserved. © 2025 - ESC Games Yazılım A.Ş.</td>
+        <td colspan="2">All rights reserved. © 2025 - ESC Games Yazılım A.Ş.</td>
       </tr>
     </table>
   </div>
