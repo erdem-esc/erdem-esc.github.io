@@ -12,125 +12,86 @@
   <link rel="icon" href="logo1-512-nobg.png" type="image/png" />
 
   <style>
-    * {
-      box-sizing: border-box;
+    body {
       margin: 0;
       padding: 0;
-    }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: 'Galindo', cursive;
-      background: black;
-    }
-
-    /* Background video */
-    #bg-video {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
       height: 100vh;
-      object-fit: cover;
-      z-index: 0;
-    }
-
-    .overlay {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      height: 100%;
+      width: 100vw;
+      background: black;
+      color: #ccc;
+      font-family: 'Roboto Mono', monospace;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+    }
+
+    .logo {
+      max-height: 40vh;
+      margin-bottom: 40px;
+    }
+
+    table {
+      border-collapse: collapse;
       text-align: center;
-      color: white;
-      padding: 20px;
-      transform: translateY(-15vh);
-    }
-
-    .overlay img {
-      height: 50vh;
-      margin-bottom: 0px;
-    }
-
-    h1 {
-      font-family: 'Galindo', cursive;
-      font-weight: normal;
-      margin-bottom: 20px;
-    }
-
-    .desktop-line {
-      display: block;
-      font-size: 2.5em;
-    }
-
-    .mobile-line {
-      display: none;
-    }
-
-    .email a {
-      font-family: 'Roboto Mono', monospace;
+      color: #ccc;
       font-size: 0.95em;
-      color: white;
+    }
+
+    td {
+      padding: 10px 30px;
+    }
+
+    a {
+      color: #ccc;
       text-decoration: none;
       transition: color 0.3s ease;
     }
 
-    .email a:hover,
-    .email a:active {
-      color: #ccc;
+    a:hover {
+      color: white;
     }
 
-    /* Mobile-specific styling */
+    /* Row 3 spans across */
+    .full-row {
+      text-align: center;
+      padding-top: 15px;
+      font-size: 0.85em;
+    }
+
     @media (max-width: 600px) {
-      .overlay {
-        transform: translateY(-4vh);
-        padding: 40px 20px 20px;
+      .logo {
+        max-height: 25vh;
       }
 
-      .overlay img {
-        height: 30vh;
-        margin-bottom: 20px;
-      }
-
-      .desktop-line {
-        display: none;
-      }
-
-      .mobile-line {
+      td {
         display: block;
-        font-size: 1.5em;
-        line-height: 1.4;
-        margin-bottom: 15px;
+        padding: 8px 0;
       }
 
-      .email a {
+      table {
         font-size: 0.85em;
       }
     }
   </style>
 </head>
 <body>
+  <!-- Logo -->
+  <img src="logo1-512-nobg.png" alt="ESC Games Logo" class="logo">
 
-  <!-- Background Video -->
-  <video autoplay muted loop playsinline id="bg-video" preload="auto">
-    <source src="video3.mp4" type="video/mp4" />
-    Your browser does not support the video tag.
-  </video>  
-
-  <!-- Overlay Content -->
-  <div class="overlay">
-    <img src="logo1-512-nobg.png" alt="Logo" />
-    <h1 class="desktop-line">Something exciting, in the making.</h1>
-    <h1 class="mobile-line">Something exciting,<br>in the making.</h1>
-    <div class="email">
-      <a href="mailto:info@esc.gs">info@esc.gs</a>
-    </div>
-  </div>
-
+  <!-- Info Table -->
+  <table>
+    <tr>
+      <td><a href="mailto:info@esc.gs">Contact Us</a></td>
+      <td><a href="https://www.linkedin.com/company/escgames/" target="_blank">LinkedIn</a></td>
+    </tr>
+    <tr>
+      <td><a href="privacy.html">Privacy Policy</a></td>
+      <td><a href="terms.html">Terms of Use</a></td>
+    </tr>
+    <tr>
+      <td colspan="2" class="full-row">All rights reserved. © 2025 - ESC Games Yazılım A.Ş.</td>
+    </tr>
+  </table>
 </body>
 </html>
