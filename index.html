@@ -12,86 +12,160 @@
   <link rel="icon" href="logo1-512-nobg.png" type="image/png" />
 
   <style>
-    body {
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      height: 100vh;
-      width: 100vw;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: 'Galindo', cursive;
       background: black;
       color: #ccc;
-      font-family: 'Roboto Mono', monospace;
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
     }
 
-    .logo {
-      max-height: 40vh;
-      margin-bottom: 40px;
-    }
-
-    table {
-      border-collapse: collapse;
+    .overlay {
+      width: 100%;
+      max-width: 1000px;
       text-align: center;
-      color: #ccc;
-      font-size: 0.95em;
+      padding: 20px;
     }
 
-    td {
-      padding: 10px 30px;
+    .overlay img {
+      width: 50vw;         /* logo takes 50% of viewport width */
+      max-width: 400px;    /* but never bigger than 400px */
+      height: auto;        /* maintain aspect ratio */
+      margin-bottom: 20px;
     }
 
-    a {
+    h1 {
+      font-weight: normal;
+      margin-bottom: 20px;
+    }
+
+    .desktop-line {
+      display: block;
+      font-size: 1.25em;
+    }
+
+    .mobile-line {
+      display: none;
+      font-size: 0.75em;
+    }
+
+    .email a {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 0.475em;
       color: #ccc;
       text-decoration: none;
       transition: color 0.3s ease;
     }
 
-    a:hover {
-      color: white;
+    .email a:hover,
+    .email a:active {
+      color: #fff;
     }
 
-    /* Row 3 spans across */
-    .full-row {
+    /* Footer table */
+    .footer-table {
+      margin-top: 40px;
+      width: 80%;
+      max-width: 600px;
+      border-collapse: collapse;
+      color: #ccc;
+      font-size: 0.475em;
+    }
+
+    .footer-table td {
+      padding: 5px 10px;
+    }
+
+    .footer-table a {
+      color: #ccc;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-table a:hover,
+    .footer-table a:active {
+      color: #fff;
+    }
+
+    .footer-table .left {
+      text-align: left;
+    }
+
+    .footer-table .right {
+      text-align: right;
+    }
+
+    .footer-table .center {
       text-align: center;
-      padding-top: 15px;
-      font-size: 0.85em;
     }
 
+    /* Mobile-specific styling */
     @media (max-width: 600px) {
-      .logo {
-        max-height: 25vh;
+      .overlay img {
+        width: 70vw;        /* larger relative to mobile screen */
+        max-width: 250px;   /* but still limited */
+        margin-bottom: 20px;
       }
 
-      td {
+      .desktop-line {
+        display: none;
+      }
+
+      .mobile-line {
         display: block;
-        padding: 8px 0;
       }
 
-      table {
-        font-size: 0.85em;
+      .email a {
+        font-size: 0.425em;
+      }
+
+      .footer-table {
+        font-size: 0.425em;
+      }
+
+      .footer-table .left,
+      .footer-table .right,
+      .footer-table .center {
+        text-align: center;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Logo -->
-  <img src="logo1-512-nobg.png" alt="ESC Games Logo" class="logo">
 
-  <!-- Info Table -->
-  <table>
-    <tr>
-      <td><a href="mailto:info@esc.gs">Contact Us</a></td>
-      <td><a href="https://www.linkedin.com/company/escgames/" target="_blank">LinkedIn</a></td>
-    </tr>
-    <tr>
-      <td><a href="privacy.html">Privacy Policy</a></td>
-      <td><a href="terms.html">Terms of Use</a></td>
-    </tr>
-    <tr>
-      <td colspan="2" class="full-row">All rights reserved. © 2025 - ESC Games Yazılım A.Ş.</td>
-    </tr>
-  </table>
+  <!-- Overlay Content -->
+  <div class="overlay">
+    <img src="logo1-2048-nobg.png" alt="Logo" />
+    <h1 class="desktop-line">Something exciting, in the making.</h1>
+    <h1 class="mobile-line">Something exciting,<br>in the making.</h1>
+    <div class="email">
+      <a href="mailto:info@esc.gs">info@esc.gs</a>
+    </div>
+
+    <!-- Footer table -->
+    <table class="footer-table">
+      <tr>
+        <td class="left"><a href="mailto:info@esc.gs">Contact Us</a></td>
+        <td class="right"><a href="https://www.linkedin.com/company/escgames/">LinkedIn</a></td>
+      </tr>
+      <tr>
+        <td class="left"><a href="privacy.html">Privacy Policy</a></td>
+        <td class="right"><a href="terms.html">Terms of Use</a></td>
+      </tr>
+      <tr>
+        <td colspan="2" class="center">All rights reserved. © 2025 - ESC Games Yazılım A.Ş.</td>
+      </tr>
+    </table>
+  </div>
+
 </body>
 </html>
