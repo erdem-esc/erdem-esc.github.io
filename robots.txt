@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+User-agent: Googlebot
+Allow: /app-ads.txt
+
+User-agent: Mediapartners-Google
+Allow: /app-ads.txt
+
+User-agent: Google-adstxt
+Allow: /app-ads.txt
