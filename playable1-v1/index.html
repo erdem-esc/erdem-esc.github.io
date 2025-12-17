@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="ad.size" content="width=360,height=640">
+    <title>Roguelike Shooter Playable</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #game-canvas {
+            display: block;
+            background: #16213e;
+        }
+        #ui-layer {
+            position: absolute;
+            pointer-events: none;
+            overflow: visible;
+            /* Dimensions and transform set dynamically in JS */
+        }
+        #upgrade-panel {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: transparent;
+            padding: 8px;
+            text-align: center;
+            display: none;
+            pointer-events: auto;
+        }
+        .level-up-banner {
+            display: inline-block;
+            background-image: url('assets/ribbon_yellow.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            color: #fff;
+            font-family: 'Lilita One', cursive;
+            font-size: 22px;
+            font-weight: bold;
+            padding: 16px 60px;
+            -webkit-text-stroke: 0.8px #000;
+            margin-bottom: 4px;
+            position: relative;
+        }
+        #upgrade-panel .subtitle {
+            color: #dfd601;
+            font-family: 'Lilita One', cursive;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            -webkit-text-stroke: 0.5px #000;
+            animation: fadeInOut 2s infinite;
+        }
+        #skill-buttons {
+            display: flex;
+            flex-direction: row;
+            gap: 4px;
+            justify-content: center;
+            width: 100%;
+            margin-top: -8px;
+        }
+        .upgrade-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            width: 110px;
+            height: 275px;
+            padding: 0;
+            color: white;
+            font-family: 'Lilita One', cursive;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+            border: none;
+            background-image: url('assets/itemselect.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: top center;
+            background-color: transparent;
+            position: relative;
+        }
+        .upgrade-btn:active {
+            transform: scale(0.95);
+        }
+        .upgrade-btn .rarity {
+            margin-top: 26px;
+            font-size: 14px;
+            color: #fff;
+            -webkit-text-stroke: 0.6px #000;
+        }
+        .upgrade-btn .skill-name {
+            margin-top: 10px;
+            font-size: 18px;
+            -webkit-text-stroke: 0.7px #000;
+        }
+        .upgrade-btn .icon {
+            width: 70px;
+            height: 70px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .upgrade-btn .icon img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        .upgrade-btn .description {
+            margin-top: 4px;
+            font-size: 14px;
+            color: #fff;
+            text-align: center;
+            padding: 0 10px;
+            -webkit-text-stroke: 0.6px #000;
+            max-width: 95%;
+            line-height: 1.3;
+        }
+        #cta-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+        #cta-screen.visible {
+            opacity: 1;
+        }
+        #cta-endcard {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #cta-btn {
+            position: absolute;
+            bottom: 40px;
+            z-index: 1;
+            padding: 20px 48px;
+            background: linear-gradient(180deg, #4ade80 0%, #22c55e 100%);
+            border: 3px solid #86efac;
+            border-radius: 16px;
+            color: white;
+            font-family: 'Lilita One', cursive;
+            font-size: 48px;
+            font-weight: bold;
+            cursor: pointer;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        #tutorial-hint {
+            position: absolute;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.8);
+            font-family: 'Lilita One', cursive;
+            font-size: 40px;
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+            animation: fadeInOut 2s infinite;
+        }
+        #collect-hint {
+            position: absolute;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.8);
+            font-family: 'Lilita One', cursive;
+            font-size: 40px;
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+            animation: fadeInOut 2s infinite;
+            display: none;
+        }
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        #xp-bar-container {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        #xp-bar-bg {
+            width: 100%;
+            height: 20px;
+            background-image: url('assets/xpbar.png');
+            background-size: 100% 100%;
+            position: relative;
+            border-radius: 4px;
+            overflow: hidden;
+            padding: 3px;
+            z-index: 2;
+        }
+        #xp-bar-inner {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #3a3a4a 0%, #252535 100%);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        #xp-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #7ed321;
+            background-image: linear-gradient(180deg, #a4e84b 0%, #7ed321 50%, #5fb315 100%);
+            border-radius: 2px;
+            transition: width 0.2s;
+        }
+        #level-display {
+            color: #fff;
+            font-family: 'Lilita One', cursive;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            margin-top: -4px;
+            padding: 5px 24px 6px 6px;
+            background-image: url('assets/tab_level.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            display: inline-block;
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="game-canvas"></canvas>
+        <div id="ui-layer">
+            <div id="xp-bar-container">
+                <div id="xp-bar-bg">
+                    <div id="xp-bar-inner">
+                        <div id="xp-bar"></div>
+                    </div>
+                </div>
+                <span id="level-display">LVL 1</span>
+            </div>
+            <div id="tutorial-hint">Drag to move</div>
+            <div id="collect-hint">Collect soul gems</div>
+            <div id="upgrade-panel">
+                <div class="level-up-banner">Level Up</div>
+                <div class="subtitle">Choose a new item!</div>
+                <div id="skill-buttons"></div>
+            </div>
+            <div id="cta-screen">
+                <img id="cta-endcard" src="assets/ps-endcard-vertical-image.png" alt="Endcard">
+                <button id="cta-btn">PLAY NOW</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ============================================
+    // MRAID Integration (for ad networks)
+    // ============================================
+    (function() {
+        window.mraid = window.mraid || {
+            isReady: function() { return true; },
+            getState: function() { return 'default'; },
+            addEventListener: function(event, callback) {
+                if (event === 'ready') callback();
+            },
+            open: function(url) { window.open(url, '_blank'); }
+        };
+    })();
+
+    // ============================================
+    // Configuration
+    // ============================================
+    const CONFIG = {
+        // Store URL - REPLACE WITH YOUR ACTUAL STORE LINKS
+        STORE_URL_IOS: 'https://apps.apple.com/app/your-game-id',
+        STORE_URL_ANDROID: 'https://play.google.com/store/apps/details?id=your.game.id',
+
+        // Gameplay tuning
+        PLAYER_SPEED: 2,
+        BULLET_SPEED: 3,
+        BULLET_FIRE_RATE: 0.5, // seconds between shots
+        ENEMY_SPEED: 1.2,
+        ENEMY_SPAWN_MARGIN: 10, // distance outside screen to spawn enemies
+        XP_ATTRACT_SPEED: 8,
+        XP_ATTRACT_RADIUS: 80,
+
+        // XP required for each level up
+        XP_TO_LEVEL_2: 5,
+        XP_TO_LEVEL_3: 12,
+
+        // Enemy spawn rates (enemies per second) by phase
+        SPAWN_RATE_PHASE_1: 2,   // Before first upgrade
+        SPAWN_RATE_PHASE_2: 3,   // After first upgrade
+        SPAWN_RATE_PHASE_3: 5,   // After second upgrade
+
+        // CTA triggers after this many kills post-second-upgrade
+        CTA_KILLS_AFTER_UPGRADE: 25,
+
+        // Max enemies on screen by phase
+        MAX_ENEMIES_PHASE_1: 8,
+        MAX_ENEMIES_PHASE_2: 20,
+        MAX_ENEMIES_PHASE_3: 40,
+
+        // Orbital settings
+        ORBITAL_COUNT: 3,
+        ORBITAL_RADIUS: 50,
+        ORBITAL_SPEED: 3,
+        ORBITAL_DAMAGE: 2,
+
+        // Game flow
+
+        // Colors (replace with sprite loading later)
+        COLOR_PLAYER: '#4ade80',
+        COLOR_ENEMY: '#ef4444',
+        COLOR_BULLET: '#fbbf24',
+        COLOR_XP: '#a855f7',
+
+        // Orbital types with colors and sprites
+        ORBITAL_TYPES: {
+            fire: { name: 'Fire', color: '#ef4444', cssClass: 'fire', sprite: 'assets/Fire_orbital.png', orbSprite: 'assets/fire_orb.png', description: 'Burn your enemies' },
+            ice: { name: 'Frozen', color: '#3b82f6', cssClass: 'ice', sprite: 'assets/Frozen_orbital.png', orbSprite: 'assets/ice_orb.png', description: 'Freeze your enemies' },
+            poison: { name: 'Poison', color: '#a855f7', cssClass: 'poison', sprite: 'assets/Poisonous_orbital.png', orbSprite: 'assets/poison_orb.png', description: 'Poison your enemies' },
+            shock: { name: 'Shock', color: '#eab308', cssClass: 'shock', sprite: 'assets/Lightning_orbital.png', orbSprite: 'assets/lightning_orb.png', description: 'Shock your enemies' }
+        },
+
+        // Sprite paths
+        SPRITES: {
+            xpOrb: 'assets/Xpgem.png',
+            background: 'assets/map.png',
+            bullet: 'assets/bullet.png',
+            enemy1: 'assets/enemy1.png',
+            enemy2: 'assets/enemy2.png',
+            enemy3: 'assets/enemy3.png',
+            player: 'assets/character.png'
+        }
+    };
+
+    // ============================================
+    // Sprite Loading
+    // ============================================
+    const sprites = {};
+    let spritesLoaded = false;
+
+    function loadSprites(callback) {
+        const toLoad = [
+            { key: 'xpOrb', src: CONFIG.SPRITES.xpOrb },
+            { key: 'background', src: CONFIG.SPRITES.background },
+            { key: 'bullet', src: CONFIG.SPRITES.bullet },
+            { key: 'enemy1', src: CONFIG.SPRITES.enemy1 },
+            { key: 'enemy2', src: CONFIG.SPRITES.enemy2 },
+            { key: 'enemy3', src: CONFIG.SPRITES.enemy3 },
+            { key: 'player', src: CONFIG.SPRITES.player },
+            { key: 'orbital_fire', src: CONFIG.ORBITAL_TYPES.fire.orbSprite },
+            { key: 'orbital_ice', src: CONFIG.ORBITAL_TYPES.ice.orbSprite },
+            { key: 'orbital_poison', src: CONFIG.ORBITAL_TYPES.poison.orbSprite },
+            { key: 'orbital_shock', src: CONFIG.ORBITAL_TYPES.shock.orbSprite }
+        ];
+
+        let loaded = 0;
+        const total = toLoad.length;
+
+        toLoad.forEach(item => {
+            const img = new Image();
+            img.onload = () => {
+                sprites[item.key] = img;
+                loaded++;
+                if (loaded === total) {
+                    spritesLoaded = true;
+                    callback();
+                }
+            };
+            img.onerror = () => {
+                console.warn('Failed to load sprite:', item.src);
+                loaded++;
+                if (loaded === total) {
+                    spritesLoaded = true;
+                    callback();
+                }
+            };
+            img.src = item.src;
+        });
+    }
+
+    // ============================================
+    // Game State
+    // ============================================
+    const game = {
+        canvas: null,
+        ctx: null,
+        width: 360,
+        height: 640,
+        scale: 1,
+        running: false,
+        paused: false,
+        lastTime: 0,
+        deltaTime: 0,
+
+        // Input
+        touch: { active: false, x: 0, y: 0 },
+
+        // Entities
+        player: null,
+        bullets: [],
+        enemies: [],
+        xpOrbs: [],
+        orbitals: [],
+
+        // Timers
+        fireTimer: 0,
+        spawnTimer: 0,
+
+        // Progression
+        xp: 0,
+        level: 1,
+        kills: 0,
+        killsAfterSecondUpgrade: 0, // Track kills after both upgrades for CTA
+        selectedOrbitalTypes: [], // Track which orbital types player has chosen
+        tutorialShown: true,
+        ctaShown: false
+    };
+
+    // ============================================
+    // Initialization
+    // ============================================
+    function init() {
+        game.canvas = document.getElementById('game-canvas');
+        game.ctx = game.canvas.getContext('2d');
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        setupInput();
+        resetGame();
+
+        // Load sprites first, then start game
+        loadSprites(() => {
+            // Wait for MRAID ready
+            if (window.mraid && !window.mraid.isReady()) {
+                window.mraid.addEventListener('ready', startGame);
+            } else {
+                startGame();
+            }
+        });
+    }
+
+    function resizeCanvas() {
+        // Fixed design resolution for mobile vertical
+        const DESIGN_WIDTH = 360;
+        const DESIGN_HEIGHT = 640;
+
+        const container = document.getElementById('game-container');
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+
+        // Calculate scale to fit container while maintaining aspect ratio
+        const scaleX = containerWidth / DESIGN_WIDTH;
+        const scaleY = containerHeight / DESIGN_HEIGHT;
+        const scale = Math.min(scaleX, scaleY);
+
+        // Set canvas to design resolution
+        game.canvas.width = DESIGN_WIDTH;
+        game.canvas.height = DESIGN_HEIGHT;
+        game.width = DESIGN_WIDTH;
+        game.height = DESIGN_HEIGHT;
+
+        // Scale canvas to fit container via CSS
+        const scaledWidth = DESIGN_WIDTH * scale;
+        const scaledHeight = DESIGN_HEIGHT * scale;
+        game.canvas.style.width = scaledWidth + 'px';
+        game.canvas.style.height = scaledHeight + 'px';
+
+        // Position UI layer to match canvas
+        const uiLayer = document.getElementById('ui-layer');
+        const offsetX = (containerWidth - scaledWidth) / 2;
+        const offsetY = (containerHeight - scaledHeight) / 2;
+        uiLayer.style.left = offsetX + 'px';
+        uiLayer.style.top = offsetY + 'px';
+        uiLayer.style.width = scaledWidth + 'px';
+        uiLayer.style.height = scaledHeight + 'px';
+
+        // Store scale for input coordinate conversion and UI scaling
+        game.scale = scale;
+
+        // Apply scale to upgrade panel (combine with centering transform)
+        const upgradePanel = document.getElementById('upgrade-panel');
+        if (upgradePanel) {
+            upgradePanel.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
+            upgradePanel.style.transformOrigin = 'center center';
+        }
+    }
+
+    function resetGame() {
+        game.player = {
+            x: game.width / 2,
+            y: game.height / 2,
+            radius: 20,
+            targetX: game.width / 2,
+            targetY: game.height / 2
+        };
+
+        game.bullets = [];
+        game.enemies = [];
+        game.xpOrbs = [];
+        game.orbitals = [];
+        game.xp = 0;
+        game.level = 1;
+        game.kills = 0;
+        game.killsAfterSecondUpgrade = 0;
+        game.selectedOrbitalTypes = [];
+        game.fireTimer = 0;
+        game.spawnTimer = 0;
+        game.paused = false;
+        game.ctaShown = false;
+
+        updateUI();
+    }
+
+    function startGame() {
+        game.running = true;
+        game.lastTime = performance.now();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // ============================================
+    // Input Handling
+    // ============================================
+    function setupInput() {
+        const canvas = game.canvas;
+
+        // Touch events
+        canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+        canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+        canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+        // Mouse fallback (for testing)
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mouseup', handleMouseUp);
+
+        // UI buttons
+        document.getElementById('cta-btn').addEventListener('click', handleCTA);
+    }
+
+    function handleTouchStart(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = game.canvas.getBoundingClientRect();
+        game.touch.active = true;
+        // Convert screen coordinates to canvas coordinates
+        game.touch.x = (touch.clientX - rect.left) / game.scale;
+        game.touch.y = (touch.clientY - rect.top) / game.scale;
+        game.player.targetX = game.touch.x;
+        game.player.targetY = game.touch.y;
+        hideTutorial();
+    }
+
+    function handleTouchMove(e) {
+        e.preventDefault();
+        if (!game.touch.active) return;
+        const touch = e.touches[0];
+        const rect = game.canvas.getBoundingClientRect();
+        // Convert screen coordinates to canvas coordinates
+        game.touch.x = (touch.clientX - rect.left) / game.scale;
+        game.touch.y = (touch.clientY - rect.top) / game.scale;
+        game.player.targetX = game.touch.x;
+        game.player.targetY = game.touch.y;
+    }
+
+    function handleTouchEnd(e) {
+        e.preventDefault();
+        game.touch.active = false;
+    }
+
+    function handleMouseDown(e) {
+        const rect = game.canvas.getBoundingClientRect();
+        game.touch.active = true;
+        // Convert screen coordinates to canvas coordinates
+        game.touch.x = (e.clientX - rect.left) / game.scale;
+        game.touch.y = (e.clientY - rect.top) / game.scale;
+        game.player.targetX = game.touch.x;
+        game.player.targetY = game.touch.y;
+        hideTutorial();
+    }
+
+    function handleMouseMove(e) {
+        if (!game.touch.active) return;
+        const rect = game.canvas.getBoundingClientRect();
+        // Convert screen coordinates to canvas coordinates
+        game.touch.x = (e.clientX - rect.left) / game.scale;
+        game.touch.y = (e.clientY - rect.top) / game.scale;
+        game.player.targetX = game.touch.x;
+        game.player.targetY = game.touch.y;
+    }
+
+    function handleMouseUp(e) {
+        game.touch.active = false;
+    }
+
+    function hideTutorial() {
+        if (game.tutorialShown) {
+            game.tutorialShown = false;
+            document.getElementById('tutorial-hint').style.display = 'none';
+            document.getElementById('collect-hint').style.display = 'block';
+        }
+    }
+
+    function hideCollectHint() {
+        document.getElementById('collect-hint').style.display = 'none';
+    }
+
+    // ============================================
+    // Game Loop
+    // ============================================
+    function gameLoop(currentTime) {
+        if (!game.running) return;
+
+        game.deltaTime = Math.min((currentTime - game.lastTime) / 1000, 0.1);
+        game.lastTime = currentTime;
+
+        if (!game.paused) {
+            update();
+        }
+        render();
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    function update() {
+        updatePlayer();
+        updateBullets();
+        updateEnemies();
+        updateXPOrbs();
+        updateOrbitals();
+
+        // Auto-fire
+        game.fireTimer += game.deltaTime;
+        if (game.fireTimer >= CONFIG.BULLET_FIRE_RATE) {
+            fireAtNearestEnemy();
+            game.fireTimer = 0;
+        }
+
+        // Enemy spawning - rate increases with upgrades, capped by max enemies
+        game.spawnTimer += game.deltaTime;
+        const spawnRate = getSpawnRate();
+        const spawnInterval = 1 / spawnRate; // Convert enemies/sec to seconds/enemy
+        if (game.spawnTimer >= spawnInterval) {
+            if (game.enemies.length < getMaxEnemies()) {
+                spawnEnemy();
+            }
+            game.spawnTimer = 0;
+        }
+
+        checkCollisions();
+
+        // Check CTA trigger - 10 kills after second upgrade
+        if (!game.ctaShown && game.selectedOrbitalTypes.length >= 2 &&
+            game.killsAfterSecondUpgrade >= CONFIG.CTA_KILLS_AFTER_UPGRADE) {
+            showCTA();
+        }
+    }
+
+    function getSpawnRate() {
+        const upgradeCount = game.selectedOrbitalTypes.length;
+        if (upgradeCount >= 2) return CONFIG.SPAWN_RATE_PHASE_3;
+        if (upgradeCount >= 1) return CONFIG.SPAWN_RATE_PHASE_2;
+        return CONFIG.SPAWN_RATE_PHASE_1;
+    }
+
+    function getMaxEnemies() {
+        const upgradeCount = game.selectedOrbitalTypes.length;
+        if (upgradeCount >= 2) return CONFIG.MAX_ENEMIES_PHASE_3;
+        if (upgradeCount >= 1) return CONFIG.MAX_ENEMIES_PHASE_2;
+        return CONFIG.MAX_ENEMIES_PHASE_1;
+    }
+
+    // ============================================
+    // Player
+    // ============================================
+    function updatePlayer() {
+        // Clamp target to middle 90% of width
+        const minX = game.width * 0.05;
+        const maxX = game.width * 0.95;
+        game.player.targetX = Math.max(minX, Math.min(maxX, game.player.targetX));
+
+        const dx = game.player.targetX - game.player.x;
+        const dy = game.player.targetY - game.player.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist > 2) {
+            const speed = CONFIG.PLAYER_SPEED;
+            game.player.x += (dx / dist) * speed;
+            game.player.y += (dy / dist) * speed;
+        }
+
+        // Keep player in bounds
+        game.player.x = Math.max(minX, Math.min(maxX, game.player.x));
+        game.player.y = Math.max(game.player.radius, Math.min(game.height - game.player.radius, game.player.y));
+    }
+
+    // ============================================
+    // Bullets
+    // ============================================
+    function fireAtNearestEnemy() {
+        if (game.enemies.length === 0) return;
+
+        // Find nearest enemy
+        let nearest = null;
+        let nearestDist = Infinity;
+
+        for (const enemy of game.enemies) {
+            const dx = enemy.x - game.player.x;
+            const dy = enemy.y - game.player.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < nearestDist) {
+                nearestDist = dist;
+                nearest = enemy;
+            }
+        }
+
+        if (nearest) {
+            const dx = nearest.x - game.player.x;
+            const dy = nearest.y - game.player.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            game.bullets.push({
+                x: game.player.x,
+                y: game.player.y,
+                vx: (dx / dist) * CONFIG.BULLET_SPEED,
+                vy: (dy / dist) * CONFIG.BULLET_SPEED,
+                radius: 6
+            });
+        }
+    }
+
+    function updateBullets() {
+        for (let i = game.bullets.length - 1; i >= 0; i--) {
+            const bullet = game.bullets[i];
+            bullet.x += bullet.vx;
+            bullet.y += bullet.vy;
+
+            // Remove if out of bounds
+            if (bullet.x < -20 || bullet.x > game.width + 20 ||
+                bullet.y < -20 || bullet.y > game.height + 20) {
+                game.bullets.splice(i, 1);
+            }
+        }
+    }
+
+    // ============================================
+    // Enemies
+    // ============================================
+    function spawnEnemy() {
+        // Spawn from top or bottom only
+        const side = Math.floor(Math.random() * 2);
+        const margin = CONFIG.ENEMY_SPAWN_MARGIN;
+        let x, y;
+
+        // Spawn in middle 80% of width (10% margin on each side)
+        const minX = game.width * 0.1;
+        const maxX = game.width * 0.9;
+        x = minX + Math.random() * (maxX - minX);
+
+        if (side === 0) {
+            y = -margin; // Top
+        } else {
+            y = game.height + margin; // Bottom
+        }
+
+        // Enemy type based on phase
+        const upgradeCount = game.selectedOrbitalTypes.length;
+        let enemyType = 1;
+        if (upgradeCount >= 2) enemyType = 3;
+        else if (upgradeCount >= 1) enemyType = 2;
+
+        game.enemies.push({
+            x: x,
+            y: y,
+            radius: 18,
+            hp: 1,
+            type: enemyType
+        });
+    }
+
+    function updateEnemies() {
+        for (const enemy of game.enemies) {
+            const dx = game.player.x - enemy.x;
+            const dy = game.player.y - enemy.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist > 0) {
+                enemy.x += (dx / dist) * CONFIG.ENEMY_SPEED;
+                enemy.y += (dy / dist) * CONFIG.ENEMY_SPEED;
+            }
+        }
+    }
+
+    function killEnemy(index) {
+        const enemy = game.enemies[index];
+
+        // Spawn XP orb - clamp to visible area
+        const padding = 10;
+        game.xpOrbs.push({
+            x: Math.max(padding, Math.min(game.width - padding, enemy.x)),
+            y: Math.max(padding, Math.min(game.height - padding, enemy.y)),
+            radius: 8
+        });
+
+        game.enemies.splice(index, 1);
+        game.kills++;
+
+        // Track kills after second upgrade for CTA
+        if (game.selectedOrbitalTypes.length >= 2) {
+            game.killsAfterSecondUpgrade++;
+        }
+    }
+
+    // ============================================
+    // XP Orbs
+    // ============================================
+    function updateXPOrbs() {
+        for (let i = game.xpOrbs.length - 1; i >= 0; i--) {
+            const orb = game.xpOrbs[i];
+
+            const dx = game.player.x - orb.x;
+            const dy = game.player.y - orb.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            // Attract toward player when close
+            if (dist < CONFIG.XP_ATTRACT_RADIUS) {
+                orb.x += (dx / dist) * CONFIG.XP_ATTRACT_SPEED;
+                orb.y += (dy / dist) * CONFIG.XP_ATTRACT_SPEED;
+            }
+
+            // Collect XP
+            if (dist < game.player.radius + orb.radius) {
+                game.xpOrbs.splice(i, 1);
+                collectXP();
+            }
+        }
+    }
+
+    function collectXP() {
+        game.xp++;
+        hideCollectHint();
+        updateUI();
+
+        // Level up with different XP thresholds
+        const xpNeeded = game.level === 1 ? CONFIG.XP_TO_LEVEL_2 : CONFIG.XP_TO_LEVEL_3;
+        if (game.xp >= xpNeeded && game.level <= 2) {
+            levelUp();
+        }
+    }
+
+    function levelUp() {
+        game.level++;
+        game.xp = 0;
+        game.paused = true;
+        updateUI();
+        showSkillSelection();
+    }
+
+    function showSkillSelection() {
+        const container = document.getElementById('skill-buttons');
+        container.innerHTML = '';
+
+        let availableSkills = [];
+
+        if (game.selectedOrbitalTypes.length === 0) {
+            // First selection: fire, ice, poison
+            availableSkills = ['fire', 'ice', 'poison'];
+        } else {
+            // Second selection: remaining from first + shock
+            const firstPick = game.selectedOrbitalTypes[0];
+            availableSkills = ['fire', 'ice', 'poison'].filter(s => s !== firstPick);
+            availableSkills.push('shock');
+        }
+
+        // Create buttons
+        availableSkills.forEach(skillType => {
+            const skill = CONFIG.ORBITAL_TYPES[skillType];
+            const btn = document.createElement('button');
+            btn.className = 'upgrade-btn ' + skill.cssClass;
+
+            // Add rarity on ribbon
+            const raritySpan = document.createElement('span');
+            raritySpan.className = 'rarity';
+            raritySpan.textContent = 'Epic';
+            btn.appendChild(raritySpan);
+
+            // Add skill name below rarity
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'skill-name';
+            nameSpan.textContent = skill.name;
+            btn.appendChild(nameSpan);
+
+            // Add icon
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'icon';
+            const iconImg = document.createElement('img');
+            iconImg.src = skill.sprite;
+            iconDiv.appendChild(iconImg);
+            btn.appendChild(iconDiv);
+
+            // Add description
+            const descSpan = document.createElement('span');
+            descSpan.className = 'description';
+            descSpan.textContent = skill.description || 'Orbitals around you';
+            btn.appendChild(descSpan);
+
+            btn.addEventListener('click', () => selectSkill(skillType));
+            container.appendChild(btn);
+        });
+
+        document.getElementById('upgrade-panel').style.display = 'block';
+    }
+
+    function selectSkill(skillType) {
+        document.getElementById('upgrade-panel').style.display = 'none';
+        game.selectedOrbitalTypes.push(skillType);
+        game.paused = false;
+
+        // Regenerate all orbitals to ensure proper spacing
+        regenerateOrbitals();
+    }
+
+    function regenerateOrbitals() {
+        game.orbitals = [];
+
+        const totalTypes = game.selectedOrbitalTypes.length;
+        const orbitalsPerType = CONFIG.ORBITAL_COUNT;
+        const totalOrbitals = totalTypes * orbitalsPerType;
+        const angleStep = (Math.PI * 2) / totalOrbitals;
+
+        let index = 0;
+        for (let t = 0; t < totalTypes; t++) {
+            const skillType = game.selectedOrbitalTypes[t];
+            const color = CONFIG.ORBITAL_TYPES[skillType].color;
+
+            for (let i = 0; i < orbitalsPerType; i++) {
+                // Interleave: type 0 gets positions 0,2,4 / type 1 gets positions 1,3,5
+                const position = i * totalTypes + t;
+                game.orbitals.push({
+                    angle: position * angleStep,
+                    radius: 12,
+                    type: skillType,
+                    color: color
+                });
+            }
+        }
+    }
+
+    // ============================================
+    // Orbitals
+    // ============================================
+    function updateOrbitals() {
+        for (const orbital of game.orbitals) {
+            orbital.angle += CONFIG.ORBITAL_SPEED * game.deltaTime;
+        }
+    }
+
+    function getOrbitalPosition(orbital) {
+        return {
+            x: game.player.x + Math.cos(orbital.angle) * CONFIG.ORBITAL_RADIUS,
+            y: game.player.y + Math.sin(orbital.angle) * CONFIG.ORBITAL_RADIUS
+        };
+    }
+
+    // ============================================
+    // Collisions
+    // ============================================
+    function checkCollisions() {
+        // Bullets vs Enemies
+        for (let i = game.bullets.length - 1; i >= 0; i--) {
+            const bullet = game.bullets[i];
+
+            for (let j = game.enemies.length - 1; j >= 0; j--) {
+                const enemy = game.enemies[j];
+                const dx = bullet.x - enemy.x;
+                const dy = bullet.y - enemy.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < bullet.radius + enemy.radius) {
+                    game.bullets.splice(i, 1);
+                    killEnemy(j);
+                    break;
+                }
+            }
+        }
+
+        // Orbitals vs Enemies
+        if (game.orbitals.length > 0) {
+            for (const orbital of game.orbitals) {
+                const pos = getOrbitalPosition(orbital);
+
+                for (let j = game.enemies.length - 1; j >= 0; j--) {
+                    const enemy = game.enemies[j];
+                    const dx = pos.x - enemy.x;
+                    const dy = pos.y - enemy.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < orbital.radius + enemy.radius) {
+                        killEnemy(j);
+                    }
+                }
+            }
+        }
+    }
+
+    // ============================================
+    // UI
+    // ============================================
+    function updateUI() {
+        const xpNeeded = game.level === 1 ? CONFIG.XP_TO_LEVEL_2 : CONFIG.XP_TO_LEVEL_3;
+        const xpPercent = (game.xp / xpNeeded) * 100;
+        document.getElementById('xp-bar').style.width = xpPercent + '%';
+        document.getElementById('level-display').textContent = 'LVL ' + game.level;
+    }
+
+    function showCTA() {
+        game.ctaShown = true;
+        game.paused = true;
+        const ctaScreen = document.getElementById('cta-screen');
+        ctaScreen.style.display = 'flex';
+        // Small delay to allow display change, then fade in
+        setTimeout(() => {
+            ctaScreen.classList.add('visible');
+        }, 50);
+    }
+
+    function handleCTA() {
+        // Detect platform
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const storeUrl = isIOS ? CONFIG.STORE_URL_IOS : CONFIG.STORE_URL_ANDROID;
+
+        if (window.mraid && typeof window.mraid.open === 'function') {
+            window.mraid.open(storeUrl);
+        } else {
+            window.open(storeUrl, '_blank');
+        }
+    }
+
+    // ============================================
+    // Rendering
+    // ============================================
+    function render() {
+        const ctx = game.ctx;
+
+        // Draw background - scale to fit
+        if (sprites.background) {
+            ctx.drawImage(sprites.background, 0, 0, game.width, game.height);
+        } else {
+            ctx.fillStyle = '#16213e';
+            ctx.fillRect(0, 0, game.width, game.height);
+        }
+
+        // Draw XP orbs (0.2x scale)
+        for (const orb of game.xpOrbs) {
+            if (sprites.xpOrb) {
+                const size = orb.radius * 1.5;
+                ctx.drawImage(sprites.xpOrb, orb.x - size/2, orb.y - size/2, size, size);
+            } else {
+                ctx.fillStyle = CONFIG.COLOR_XP;
+                ctx.beginPath();
+                ctx.arc(orb.x, orb.y, orb.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Draw enemies - preserve aspect ratio (0.5x scale)
+        for (const enemy of game.enemies) {
+            const spriteKey = 'enemy' + (enemy.type || 1);
+            if (sprites[spriteKey]) {
+                const img = sprites[spriteKey];
+                const scale = (enemy.radius * 2) / Math.max(img.width, img.height);
+                const w = img.width * scale;
+                const h = img.height * scale;
+                ctx.drawImage(img, enemy.x - w/2, enemy.y - h/2, w, h);
+            } else {
+                ctx.fillStyle = CONFIG.COLOR_ENEMY;
+                ctx.beginPath();
+                ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Draw bullets
+        for (const bullet of game.bullets) {
+            if (sprites.bullet) {
+                const size = bullet.radius * 2;
+                const angle = Math.atan2(bullet.vy, bullet.vx);
+                ctx.save();
+                ctx.translate(bullet.x, bullet.y);
+                ctx.rotate(angle);
+                ctx.drawImage(sprites.bullet, -size/2, -size/2, size, size);
+                ctx.restore();
+            } else {
+                ctx.fillStyle = CONFIG.COLOR_BULLET;
+                ctx.beginPath();
+                ctx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Draw player - preserve aspect ratio (0.8x scale)
+        if (sprites.player) {
+            const img = sprites.player;
+            const scale = (game.player.radius * 2.4) / Math.max(img.width, img.height);
+            const w = img.width * scale;
+            const h = img.height * scale;
+            ctx.drawImage(img, game.player.x - w/2, game.player.y - h/2, w, h);
+        } else {
+            ctx.fillStyle = CONFIG.COLOR_PLAYER;
+            ctx.beginPath();
+            ctx.arc(game.player.x, game.player.y, game.player.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Draw orbitals with sprites
+        if (game.orbitals.length > 0) {
+            for (const orbital of game.orbitals) {
+                const pos = getOrbitalPosition(orbital);
+                const spriteKey = 'orbital_' + orbital.type;
+                if (sprites[spriteKey]) {
+                    const size = orbital.radius * 2;
+                    ctx.drawImage(sprites[spriteKey], pos.x - size/2, pos.y - size/2, size, size);
+                } else {
+                    ctx.fillStyle = orbital.color;
+                    ctx.beginPath();
+                    ctx.arc(pos.x, pos.y, orbital.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+    }
+
+    function drawGrid() {
+        const ctx = game.ctx;
+        ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+        ctx.lineWidth = 1;
+
+        const gridSize = 40;
+        for (let x = 0; x < game.width; x += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, game.height);
+            ctx.stroke();
+        }
+        for (let y = 0; y < game.height; y += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(game.width, y);
+            ctx.stroke();
+        }
+    }
+
+    // ============================================
+    // Start
+    // ============================================
+    document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
