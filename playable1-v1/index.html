@@ -630,6 +630,9 @@
     function handleTouchEnd(e) {
         e.preventDefault();
         game.touch.active = false;
+        // Stop player movement when releasing
+        game.player.targetX = game.player.x;
+        game.player.targetY = game.player.y;
     }
 
     function handleMouseDown(e) {
@@ -665,6 +668,9 @@
 
     function handleMouseUp(e) {
         game.touch.active = false;
+        // Stop player movement when releasing
+        game.player.targetX = game.player.x;
+        game.player.targetY = game.player.y;
     }
 
     function hideTutorial() {
