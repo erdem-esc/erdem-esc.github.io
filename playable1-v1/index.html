@@ -347,7 +347,7 @@
         MAX_ENEMIES_PHASE_3: 40,
 
         // Orbital settings
-        ORBITAL_COUNT: 3,
+        ORBITAL_COUNT: 1,
         ORBITAL_RADIUS: 50,
         ORBITAL_SPEED: 3,
         ORBITAL_DAMAGE: 2,
@@ -362,10 +362,10 @@
 
         // Orbital types with colors and sprites
         ORBITAL_TYPES: {
-            fire: { name: 'Fire', color: '#ef4444', cssClass: 'fire', sprite: 'assets/Fire_orbital.png', orbSprite: 'assets/fire_orb.png', description: 'Burn your enemies' },
-            ice: { name: 'Frozen', color: '#3b82f6', cssClass: 'ice', sprite: 'assets/Frozen_orbital.png', orbSprite: 'assets/ice_orb.png', description: 'Freeze your enemies' },
-            poison: { name: 'Poison', color: '#a855f7', cssClass: 'poison', sprite: 'assets/Poisonous_orbital.png', orbSprite: 'assets/poison_orb.png', description: 'Poison your enemies' },
-            shock: { name: 'Shock', color: '#eab308', cssClass: 'shock', sprite: 'assets/Lightning_orbital.png', orbSprite: 'assets/lightning_orb.png', description: 'Shock your enemies' }
+            fire: { name: 'Fire', color: '#ef4444', cssClass: 'fire', sprite: 'assets/Fire_orbital.png', orbSprite: 'assets/fireorbital.png', description: 'Burn your enemies' },
+            ice: { name: 'Frozen', color: '#3b82f6', cssClass: 'ice', sprite: 'assets/Frozen_orbital.png', orbSprite: 'assets/iceorbital.png', description: 'Freeze your enemies' },
+            poison: { name: 'Poison', color: '#a855f7', cssClass: 'poison', sprite: 'assets/Poisonous_orbital.png', orbSprite: 'assets/poisonorbital.png', description: 'Poison your enemies' },
+            shock: { name: 'Shock', color: '#eab308', cssClass: 'shock', sprite: 'assets/Lightning_orbital.png', orbSprite: 'assets/lightningorbital.png', description: 'Shock your enemies' }
         },
 
         // Sprite paths
@@ -975,26 +975,21 @@
     function regenerateOrbitals() {
         game.orbitals = [];
 
-        const totalTypes = game.selectedOrbitalTypes.length;
-        const orbitalsPerType = CONFIG.ORBITAL_COUNT;
-        const totalOrbitals = totalTypes * orbitalsPerType;
-        const angleStep = (Math.PI * 2) / totalOrbitals;
-
-        let index = 0;
-        for (let t = 0; t < totalTypes; t++) {
+        // Each skill type creates one orbital group (image contains 4 orbs)
+        for (let t = 0; t < game.selectedOrbitalTypes.length; t++) {
             const skillType = game.selectedOrbitalTypes[t];
             const color = CONFIG.ORBITAL_TYPES[skillType].color;
 
-            for (let i = 0; i < orbitalsPerType; i++) {
-                // Interleave: type 0 gets positions 0,2,4 / type 1 gets positions 1,3,5
-                const position = i * totalTypes + t;
-                game.orbitals.push({
-                    angle: position * angleStep,
-                    radius: 12,
-                    type: skillType,
-                    color: color
-                });
-            }
+            // Second skill gets 45° (π/4) offset to interleave with first
+            const baseAngle = t * (Math.PI / 4);
+
+            game.orbitals.push({
+                angle: baseAngle,
+                radius: 12,  // Individual orb radius for collision detection
+                imageSize: 125,  // Size to draw the grouped orbital image
+                type: skillType,
+                color: color
+            });
         }
     }
 
@@ -1003,15 +998,21 @@
     // ============================================
     function updateOrbitals() {
         for (const orbital of game.orbitals) {
-            orbital.angle += CONFIG.ORBITAL_SPEED * game.deltaTime;
+            orbital.angle += CONFIG.ORBITAL_SPEED * game.deltaTime;  // Rotate clockwise
         }
     }
 
-    function getOrbitalPosition(orbital) {
-        return {
-            x: game.player.x + Math.cos(orbital.angle) * CONFIG.ORBITAL_RADIUS,
-            y: game.player.y + Math.sin(orbital.angle) * CONFIG.ORBITAL_RADIUS
-        };
+    // Returns array of 4 orb positions for collision detection (orbs at 0°, 90°, 180°, 270° in the image)
+    function getOrbitalPositions(orbital) {
+        const positions = [];
+        for (let i = 0; i < 4; i++) {
+            const orbAngle = orbital.angle + (i * Math.PI / 2);  // 90° apart
+            positions.push({
+                x: game.player.x + Math.cos(orbAngle) * CONFIG.ORBITAL_RADIUS,
+                y: game.player.y + Math.sin(orbAngle) * CONFIG.ORBITAL_RADIUS
+            });
+        }
+        return positions;
     }
 
     // ============================================
@@ -1036,18 +1037,27 @@
             }
         }
 
-        // Orbitals vs Enemies
+        // Orbitals vs Enemies (check all 4 orb positions per orbital group)
         if (game.orbitals.length > 0) {
             for (const orbital of game.orbitals) {
-                const pos = getOrbitalPosition(orbital);
+                const positions = getOrbitalPositions(orbital);
 
                 for (let j = game.enemies.length - 1; j >= 0; j--) {
                     const enemy = game.enemies[j];
-                    const dx = pos.x - enemy.x;
-                    const dy = pos.y - enemy.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    let hit = false;
 
-                    if (dist < orbital.radius + enemy.radius) {
+                    for (const pos of positions) {
+                        const dx = pos.x - enemy.x;
+                        const dy = pos.y - enemy.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < orbital.radius + enemy.radius) {
+                            hit = true;
+                            break;
+                        }
+                    }
+
+                    if (hit) {
                         killEnemy(j);
                     }
                 }
@@ -1164,19 +1174,27 @@
             ctx.fill();
         }
 
-        // Draw orbitals with sprites
+        // Draw orbital groups - rotate entire image around player center
         if (game.orbitals.length > 0) {
             for (const orbital of game.orbitals) {
-                const pos = getOrbitalPosition(orbital);
                 const spriteKey = 'orbital_' + orbital.type;
                 if (sprites[spriteKey]) {
-                    const size = orbital.radius * 2;
-                    ctx.drawImage(sprites[spriteKey], pos.x - size/2, pos.y - size/2, size, size);
+                    // Draw the grouped orbital image centered on player, rotated
+                    const size = orbital.imageSize;
+                    ctx.save();
+                    ctx.translate(game.player.x, game.player.y);
+                    ctx.rotate(orbital.angle);
+                    ctx.drawImage(sprites[spriteKey], -size/2, -size/2, size, size);
+                    ctx.restore();
                 } else {
-                    ctx.fillStyle = orbital.color;
-                    ctx.beginPath();
-                    ctx.arc(pos.x, pos.y, orbital.radius, 0, Math.PI * 2);
-                    ctx.fill();
+                    // Fallback: draw 4 individual colored circles
+                    const positions = getOrbitalPositions(orbital);
+                    for (const pos of positions) {
+                        ctx.fillStyle = orbital.color;
+                        ctx.beginPath();
+                        ctx.arc(pos.x, pos.y, orbital.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
                 }
             }
         }
