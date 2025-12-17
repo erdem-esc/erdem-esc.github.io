@@ -594,9 +594,7 @@
         // Convert screen coordinates to canvas coordinates
         game.touch.x = (touch.clientX - rect.left) / game.scale;
         game.touch.y = (touch.clientY - rect.top) / game.scale;
-        game.player.targetX = game.touch.x;
-        game.player.targetY = game.touch.y;
-        hideTutorial();
+        // Don't set target on tap, only on drag
     }
 
     function handleTouchMove(e) {
@@ -609,6 +607,7 @@
         game.touch.y = (touch.clientY - rect.top) / game.scale;
         game.player.targetX = game.touch.x;
         game.player.targetY = game.touch.y;
+        hideTutorial();
     }
 
     function handleTouchEnd(e) {
@@ -622,9 +621,7 @@
         // Convert screen coordinates to canvas coordinates
         game.touch.x = (e.clientX - rect.left) / game.scale;
         game.touch.y = (e.clientY - rect.top) / game.scale;
-        game.player.targetX = game.touch.x;
-        game.player.targetY = game.touch.y;
-        hideTutorial();
+        // Don't set target on click, only on drag
     }
 
     function handleMouseMove(e) {
@@ -635,6 +632,7 @@
         game.touch.y = (e.clientY - rect.top) / game.scale;
         game.player.targetX = game.touch.x;
         game.player.targetY = game.touch.y;
+        hideTutorial();
     }
 
     function handleMouseUp(e) {
