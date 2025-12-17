@@ -558,24 +558,17 @@
     }
 
     function resizeCanvas() {
-        // Fixed design resolution for mobile vertical
-        const DESIGN_WIDTH = 360;
-        const DESIGN_HEIGHT = 640;
-
+        // Use actual screen dimensions to fill the entire screen
         const container = document.getElementById('game-container');
-        let containerWidth = container.clientWidth;
-        let containerHeight = container.clientHeight;
+        let containerWidth = container.clientWidth || window.innerWidth || 360;
+        let containerHeight = container.clientHeight || window.innerHeight || 640;
 
-        // Fallback if container has no size (MRAID environments)
-        if (containerWidth === 0 || containerHeight === 0) {
-            containerWidth = window.innerWidth || DESIGN_WIDTH;
-            containerHeight = window.innerHeight || DESIGN_HEIGHT;
-        }
+        // Design width stays fixed, height adjusts to screen aspect ratio
+        const DESIGN_WIDTH = 360;
+        const DESIGN_HEIGHT = Math.round(DESIGN_WIDTH * (containerHeight / containerWidth));
 
-        // Calculate scale to fit container while maintaining aspect ratio
-        const scaleX = containerWidth / DESIGN_WIDTH;
-        const scaleY = containerHeight / DESIGN_HEIGHT;
-        const scale = Math.min(scaleX, scaleY);
+        // Scale to fill screen
+        const scale = containerWidth / DESIGN_WIDTH;
 
         // Use device pixel ratio for crisp rendering on high-DPI screens
         const dpr = window.devicePixelRatio || 1;
@@ -589,20 +582,16 @@
         // Scale context to match device pixel ratio
         game.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-        // Scale canvas to fit container via CSS
-        const scaledWidth = DESIGN_WIDTH * scale;
-        const scaledHeight = DESIGN_HEIGHT * scale;
-        game.canvas.style.width = scaledWidth + 'px';
-        game.canvas.style.height = scaledHeight + 'px';
+        // Scale canvas to fill container via CSS
+        game.canvas.style.width = containerWidth + 'px';
+        game.canvas.style.height = containerHeight + 'px';
 
-        // Position UI layer to match canvas
+        // Position UI layer to match canvas (full screen)
         const uiLayer = document.getElementById('ui-layer');
-        const offsetX = (containerWidth - scaledWidth) / 2;
-        const offsetY = (containerHeight - scaledHeight) / 2;
-        uiLayer.style.left = offsetX + 'px';
-        uiLayer.style.top = offsetY + 'px';
-        uiLayer.style.width = scaledWidth + 'px';
-        uiLayer.style.height = scaledHeight + 'px';
+        uiLayer.style.left = '0px';
+        uiLayer.style.top = '0px';
+        uiLayer.style.width = containerWidth + 'px';
+        uiLayer.style.height = containerHeight + 'px';
 
         // Store scale for input coordinate conversion and UI scaling
         game.scale = scale;
@@ -645,20 +634,8 @@
         game.running = true;
         game.lastTime = performance.now();
 
-        // Try requestAnimationFrame first
-        if (typeof requestAnimationFrame !== 'undefined') {
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Also use setInterval as fallback (some MRAID environments block rAF)
-        setInterval(function() {
-            if (game.running) {
-                gameLoop(performance.now());
-            }
-        }, 16); // ~60fps
-
-        // Force immediate render
-        render();
+        // Use requestAnimationFrame for game loop
+        requestAnimationFrame(gameLoop);
     }
 
     // ============================================
