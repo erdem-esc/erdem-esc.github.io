@@ -601,8 +601,9 @@
         // Convert screen coordinates to canvas coordinates
         game.touch.startX = (touch.clientX - rect.left) / game.scale;
         game.touch.startY = (touch.clientY - rect.top) / game.scale;
-        game.touch.x = game.touch.startX;
-        game.touch.y = game.touch.startY;
+        // Remember player position at touch start for relative movement
+        game.touch.playerStartX = game.player.x;
+        game.touch.playerStartY = game.player.y;
     }
 
     function handleTouchMove(e) {
@@ -611,18 +612,19 @@
         const touch = e.touches[0];
         const rect = game.canvas.getBoundingClientRect();
         // Convert screen coordinates to canvas coordinates
-        game.touch.x = (touch.clientX - rect.left) / game.scale;
-        game.touch.y = (touch.clientY - rect.top) / game.scale;
+        const touchX = (touch.clientX - rect.left) / game.scale;
+        const touchY = (touch.clientY - rect.top) / game.scale;
 
-        // Check if we've dragged far enough to count as a real drag (10 pixel threshold)
-        const dx = game.touch.x - game.touch.startX;
-        const dy = game.touch.y - game.touch.startY;
+        // Calculate drag delta from touch start
+        const dx = touchX - game.touch.startX;
+        const dy = touchY - game.touch.startY;
         const dragDist = Math.sqrt(dx * dx + dy * dy);
 
         if (dragDist > 10 || game.touch.isDragging) {
             game.touch.isDragging = true;
-            game.player.targetX = game.touch.x;
-            game.player.targetY = game.touch.y;
+            // Apply drag delta to player's starting position (relative movement)
+            game.player.targetX = game.touch.playerStartX + dx;
+            game.player.targetY = game.touch.playerStartY + dy;
             hideTutorial();
         }
     }
@@ -642,26 +644,28 @@
         // Convert screen coordinates to canvas coordinates
         game.touch.startX = (e.clientX - rect.left) / game.scale;
         game.touch.startY = (e.clientY - rect.top) / game.scale;
-        game.touch.x = game.touch.startX;
-        game.touch.y = game.touch.startY;
+        // Remember player position at click start for relative movement
+        game.touch.playerStartX = game.player.x;
+        game.touch.playerStartY = game.player.y;
     }
 
     function handleMouseMove(e) {
         if (!game.touch.active) return;
         const rect = game.canvas.getBoundingClientRect();
         // Convert screen coordinates to canvas coordinates
-        game.touch.x = (e.clientX - rect.left) / game.scale;
-        game.touch.y = (e.clientY - rect.top) / game.scale;
+        const mouseX = (e.clientX - rect.left) / game.scale;
+        const mouseY = (e.clientY - rect.top) / game.scale;
 
-        // Check if we've dragged far enough to count as a real drag (10 pixel threshold)
-        const dx = game.touch.x - game.touch.startX;
-        const dy = game.touch.y - game.touch.startY;
+        // Calculate drag delta from click start
+        const dx = mouseX - game.touch.startX;
+        const dy = mouseY - game.touch.startY;
         const dragDist = Math.sqrt(dx * dx + dy * dy);
 
         if (dragDist > 10 || game.touch.isDragging) {
             game.touch.isDragging = true;
-            game.player.targetX = game.touch.x;
-            game.player.targetY = game.touch.y;
+            // Apply drag delta to player's starting position (relative movement)
+            game.player.targetX = game.touch.playerStartX + dx;
+            game.player.targetY = game.touch.playerStartY + dy;
             hideTutorial();
         }
     }
