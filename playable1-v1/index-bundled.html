@@ -303,6 +303,7 @@
     // ============================================
     var mraidReady = false;
     var gameStarted = false;
+    var isViewable = false;
 
     function initMRAID() {
         if (typeof mraid !== 'undefined') {
@@ -315,16 +316,32 @@
         } else {
             // No MRAID - browser testing mode
             mraidReady = true;
+            isViewable = true;
         }
     }
 
     function onMRAIDReady() {
         mraidReady = true;
-        tryStartGame();
+
+        // Required: Listen for viewableChange events
+        mraid.addEventListener('viewableChange', onViewableChange);
+
+        // Required: Check initial viewable state
+        isViewable = mraid.isViewable();
+        if (isViewable) {
+            tryStartGame();
+        }
+    }
+
+    function onViewableChange(viewable) {
+        isViewable = viewable;
+        if (viewable) {
+            tryStartGame();
+        }
     }
 
     function tryStartGame() {
-        if (spritesLoaded && !gameStarted) {
+        if (spritesLoaded && !gameStarted && isViewable) {
             gameStarted = true;
             startGame();
         }
@@ -527,8 +544,14 @@
         const DESIGN_HEIGHT = 640;
 
         const container = document.getElementById('game-container');
-        const containerWidth = container.clientWidth;
-        const containerHeight = container.clientHeight;
+        let containerWidth = container.clientWidth;
+        let containerHeight = container.clientHeight;
+
+        // Fallback if container has no size (MRAID environments)
+        if (containerWidth === 0 || containerHeight === 0) {
+            containerWidth = window.innerWidth || DESIGN_WIDTH;
+            containerHeight = window.innerHeight || DESIGN_HEIGHT;
+        }
 
         // Calculate scale to fit container while maintaining aspect ratio
         const scaleX = containerWidth / DESIGN_WIDTH;
@@ -602,7 +625,21 @@
     function startGame() {
         game.running = true;
         game.lastTime = performance.now();
-        requestAnimationFrame(gameLoop);
+
+        // Try requestAnimationFrame first
+        if (typeof requestAnimationFrame !== 'undefined') {
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Also use setInterval as fallback (some MRAID environments block rAF)
+        setInterval(function() {
+            if (game.running) {
+                gameLoop(performance.now());
+            }
+        }, 16); // ~60fps
+
+        // Force immediate render
+        render();
     }
 
     // ============================================
