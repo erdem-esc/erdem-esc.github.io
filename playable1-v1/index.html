@@ -299,56 +299,75 @@
 
     <script>
     // ============================================
-    // MRAID Integration (for ad networks)
+    // MRAID 2.0 Integration (for ad networks)
     // ============================================
     var mraidReady = false;
     var gameStarted = false;
     var isViewable = false;
 
     function initMRAID() {
-        if (typeof mraid !== 'undefined') {
-            // Real MRAID environment
-            if (mraid.isReady()) {
-                onMRAIDReady();
-            } else {
-                mraid.addEventListener('ready', onMRAIDReady);
-            }
-        } else {
+        // Check if MRAID exists
+        if (typeof mraid === 'undefined') {
             // No MRAID - browser testing mode
             mraidReady = true;
             isViewable = true;
+            return;
+        }
+
+        // MRAID 2.0 pattern: check getState first
+        if (mraid.getState() === 'loading') {
+            // MRAID still loading, wait for ready
+            mraid.addEventListener('ready', onMRAIDReady);
+        } else {
+            // MRAID already ready
+            onMRAIDReady();
         }
     }
 
     function onMRAIDReady() {
         mraidReady = true;
 
-        // Required: Listen for viewableChange events
+        // Required: Listen for viewableChange events (MRAID 2.0)
         mraid.addEventListener('viewableChange', onViewableChange);
 
+        // Required: Listen for stateChange events (MRAID 2.0)
+        mraid.addEventListener('stateChange', onStateChange);
+
         // Required: Check initial viewable state
-        isViewable = mraid.isViewable();
-        if (isViewable) {
-            tryStartGame();
+        if (mraid.isViewable()) {
+            onViewableChange(true);
         }
     }
 
     function onViewableChange(viewable) {
         isViewable = viewable;
-        if (viewable) {
+        if (viewable && !gameStarted) {
             tryStartGame();
+        } else if (!viewable && gameStarted) {
+            // Pause game when not viewable
+            game.paused = true;
+        } else if (viewable && gameStarted) {
+            // Resume game when viewable again
+            game.paused = false;
+        }
+    }
+
+    function onStateChange(state) {
+        // Handle state changes (default, expanded, resized, hidden)
+        if (state === 'hidden') {
+            game.paused = true;
         }
     }
 
     function tryStartGame() {
-        if (spritesLoaded && !gameStarted && isViewable) {
+        if (spritesLoaded && !gameStarted && isViewable && mraidReady) {
             gameStarted = true;
             startGame();
         }
     }
 
     function openStore(url) {
-        if (typeof mraid !== 'undefined' && mraid.open) {
+        if (typeof mraid !== 'undefined' && typeof mraid.open === 'function') {
             mraid.open(url);
         } else {
             window.open(url, '_blank');
