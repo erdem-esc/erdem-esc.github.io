@@ -320,24 +320,11 @@
 
     function onMRAIDReady() {
         mraidReady = true;
-        // Listen for viewable changes
-        if (typeof mraid !== 'undefined') {
-            mraid.addEventListener('viewableChange', onViewableChange);
-            // Check if already viewable
-            if (mraid.isViewable()) {
-                onViewableChange(true);
-            }
-        }
-    }
-
-    function onViewableChange(viewable) {
-        if (viewable && !gameStarted) {
-            tryStartGame();
-        }
+        tryStartGame();
     }
 
     function tryStartGame() {
-        if (mraidReady && spritesLoaded && !gameStarted) {
+        if (spritesLoaded && !gameStarted) {
             gameStarted = true;
             startGame();
         }
@@ -442,6 +429,18 @@
 
         let loaded = 0;
         const total = toLoad.length;
+        let callbackCalled = false;
+
+        function onComplete() {
+            if (!callbackCalled) {
+                callbackCalled = true;
+                spritesLoaded = true;
+                callback();
+            }
+        }
+
+        // Fallback timeout - start game after 2 seconds even if sprites fail
+        setTimeout(onComplete, 2000);
 
         toLoad.forEach(item => {
             const img = new Image();
@@ -449,16 +448,13 @@
                 sprites[item.key] = img;
                 loaded++;
                 if (loaded === total) {
-                    spritesLoaded = true;
-                    callback();
+                    onComplete();
                 }
             };
             img.onerror = () => {
-                console.warn('Failed to load sprite:', item.src);
                 loaded++;
                 if (loaded === total) {
-                    spritesLoaded = true;
-                    callback();
+                    onComplete();
                 }
             };
             img.src = item.src;
@@ -521,14 +517,7 @@
 
         // Load sprites, then try to start game
         loadSprites(() => {
-            // In browser (no MRAID), start immediately
-            // In MRAID environment, wait for viewable
-            if (typeof mraid === 'undefined') {
-                tryStartGame();
-            } else if (mraidReady && mraid.isViewable()) {
-                tryStartGame();
-            }
-            // Otherwise, onViewableChange will trigger tryStartGame
+            tryStartGame();
         });
     }
 
