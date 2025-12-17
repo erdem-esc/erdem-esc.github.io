@@ -301,16 +301,55 @@
     // ============================================
     // MRAID Integration (for ad networks)
     // ============================================
-    (function() {
-        window.mraid = window.mraid || {
-            isReady: function() { return true; },
-            getState: function() { return 'default'; },
-            addEventListener: function(event, callback) {
-                if (event === 'ready') callback();
-            },
-            open: function(url) { window.open(url, '_blank'); }
-        };
-    })();
+    var mraidReady = false;
+    var gameStarted = false;
+
+    function initMRAID() {
+        if (typeof mraid !== 'undefined') {
+            // Real MRAID environment
+            if (mraid.isReady()) {
+                onMRAIDReady();
+            } else {
+                mraid.addEventListener('ready', onMRAIDReady);
+            }
+        } else {
+            // No MRAID - browser testing mode
+            mraidReady = true;
+        }
+    }
+
+    function onMRAIDReady() {
+        mraidReady = true;
+        // Listen for viewable changes
+        if (typeof mraid !== 'undefined') {
+            mraid.addEventListener('viewableChange', onViewableChange);
+            // Check if already viewable
+            if (mraid.isViewable()) {
+                onViewableChange(true);
+            }
+        }
+    }
+
+    function onViewableChange(viewable) {
+        if (viewable && !gameStarted) {
+            tryStartGame();
+        }
+    }
+
+    function tryStartGame() {
+        if (mraidReady && spritesLoaded && !gameStarted) {
+            gameStarted = true;
+            startGame();
+        }
+    }
+
+    function openStore(url) {
+        if (typeof mraid !== 'undefined' && mraid.open) {
+            mraid.open(url);
+        } else {
+            window.open(url, '_blank');
+        }
+    }
 
     // ============================================
     // Configuration
@@ -477,14 +516,19 @@
         setupInput();
         resetGame();
 
-        // Load sprites first, then start game
+        // Initialize MRAID first
+        initMRAID();
+
+        // Load sprites, then try to start game
         loadSprites(() => {
-            // Wait for MRAID ready
-            if (window.mraid && !window.mraid.isReady()) {
-                window.mraid.addEventListener('ready', startGame);
-            } else {
-                startGame();
+            // In browser (no MRAID), start immediately
+            // In MRAID environment, wait for viewable
+            if (typeof mraid === 'undefined') {
+                tryStartGame();
+            } else if (mraidReady && mraid.isViewable()) {
+                tryStartGame();
             }
+            // Otherwise, onViewableChange will trigger tryStartGame
         });
     }
 
@@ -1122,12 +1166,7 @@
         // Detect platform
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
         const storeUrl = isIOS ? CONFIG.STORE_URL_IOS : CONFIG.STORE_URL_ANDROID;
-
-        if (window.mraid && typeof window.mraid.open === 'function') {
-            window.mraid.open(storeUrl);
-        } else {
-            window.open(storeUrl, '_blank');
-        }
+        openStore(storeUrl);
     }
 
     // ============================================
