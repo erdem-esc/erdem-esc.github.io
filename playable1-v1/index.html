@@ -502,11 +502,17 @@
         const scaleY = containerHeight / DESIGN_HEIGHT;
         const scale = Math.min(scaleX, scaleY);
 
-        // Set canvas to design resolution
-        game.canvas.width = DESIGN_WIDTH;
-        game.canvas.height = DESIGN_HEIGHT;
+        // Use device pixel ratio for crisp rendering on high-DPI screens
+        const dpr = window.devicePixelRatio || 1;
+
+        // Set canvas to design resolution * device pixel ratio
+        game.canvas.width = DESIGN_WIDTH * dpr;
+        game.canvas.height = DESIGN_HEIGHT * dpr;
         game.width = DESIGN_WIDTH;
         game.height = DESIGN_HEIGHT;
+
+        // Scale context to match device pixel ratio
+        game.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
         // Scale canvas to fit container via CSS
         const scaledWidth = DESIGN_WIDTH * scale;
