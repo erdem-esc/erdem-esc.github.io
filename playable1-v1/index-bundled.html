@@ -719,6 +719,7 @@
     }
 
     var audioStarted = false;
+    var audioContext = null;
 
     function startGame() {
         game.running = true;
@@ -728,10 +729,30 @@
         requestAnimationFrame(gameLoop);
     }
 
+    function unlockAudio() {
+        // Create and resume AudioContext for mobile
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+        // Play and immediately pause all sounds to unlock them
+        Object.values(sounds).forEach(sound => {
+            sound.play().then(() => {
+                sound.pause();
+                sound.currentTime = 0;
+            }).catch(() => {});
+        });
+    }
+
     function startAudioOnInteraction() {
         if (!audioStarted) {
             audioStarted = true;
-            playBackgroundMusic();
+            unlockAudio();
+            setTimeout(() => {
+                playBackgroundMusic();
+            }, 100);
         }
     }
 
