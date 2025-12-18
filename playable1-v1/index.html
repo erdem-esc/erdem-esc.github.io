@@ -174,7 +174,7 @@
             left: 50%;
             transform: translateX(-50%);
             z-index: 1;
-            padding: 20px 64px;
+            padding: 20px 80px;
             background: linear-gradient(180deg, #4ade80 0%, #22c55e 100%);
             border: 3px solid #86efac;
             border-radius: 16px;
@@ -479,7 +479,8 @@
             { key: 'orbital_ice', src: CONFIG.ORBITAL_TYPES.ice.orbSprite },
             { key: 'orbital_poison', src: CONFIG.ORBITAL_TYPES.poison.orbSprite },
             { key: 'orbital_shock', src: CONFIG.ORBITAL_TYPES.shock.orbSprite },
-            { key: 'endcard_horizontal', src: 'assets/ps-endcard-horizontal-image.png' }
+            { key: 'endcard_horizontal', src: 'assets/ps-endcard-horizontal-image.png' },
+            { key: 'endcard_vertical', src: 'assets/ps-endcard-vertical-image.png' }
         ];
 
         let loaded = 0;
@@ -681,6 +682,8 @@
             // Use landscape or portrait endcard based on orientation (use preloaded sprites for bundle)
             if (isLandscape && sprites.endcard_horizontal) {
                 endcard.src = sprites.endcard_horizontal.src;
+            } else if (sprites.endcard_vertical) {
+                endcard.src = sprites.endcard_vertical.src;
             }
         }
 
