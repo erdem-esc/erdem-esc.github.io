@@ -171,6 +171,8 @@
         #cta-btn {
             position: absolute;
             bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 1;
             padding: 20px 48px;
             background: linear-gradient(180deg, #4ade80 0%, #22c55e 100%);
@@ -184,6 +186,18 @@
             animation: pulse 1.5s infinite;
         }
         @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+        }
+        #cta-btn.landscape {
+            bottom: auto;
+            top: 30px;
+            left: auto;
+            right: 30px;
+            transform: none;
+            animation: pulse-landscape 1.5s infinite;
+        }
+        @keyframes pulse-landscape {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
         }
@@ -634,17 +648,9 @@
         const ctaBtn = document.getElementById('cta-btn');
         if (ctaBtn) {
             if (isLandscape) {
-                ctaBtn.style.bottom = 'auto';
-                ctaBtn.style.top = '30px';
-                ctaBtn.style.right = '30px';
-                ctaBtn.style.left = 'auto';
-                ctaBtn.style.transform = 'none';
+                ctaBtn.classList.add('landscape');
             } else {
-                ctaBtn.style.top = 'auto';
-                ctaBtn.style.bottom = '40px';
-                ctaBtn.style.right = 'auto';
-                ctaBtn.style.left = '50%';
-                ctaBtn.style.transform = 'translateX(-50%)';
+                ctaBtn.classList.remove('landscape');
             }
         }
     }
