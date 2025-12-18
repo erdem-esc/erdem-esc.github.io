@@ -460,7 +460,8 @@
             { key: 'orbital_fire', src: CONFIG.ORBITAL_TYPES.fire.orbSprite },
             { key: 'orbital_ice', src: CONFIG.ORBITAL_TYPES.ice.orbSprite },
             { key: 'orbital_poison', src: CONFIG.ORBITAL_TYPES.poison.orbSprite },
-            { key: 'orbital_shock', src: CONFIG.ORBITAL_TYPES.shock.orbSprite }
+            { key: 'orbital_shock', src: CONFIG.ORBITAL_TYPES.shock.orbSprite },
+            { key: 'endcard_horizontal', src: 'assets/ps-endcard-horizontal-image.png' }
         ];
 
         let loaded = 0;
@@ -506,6 +507,7 @@
         width: 360,
         height: 640,
         scale: 1,
+        isLandscape: false,
         running: false,
         paused: false,
         lastTime: 0,
@@ -563,12 +565,21 @@
         let containerWidth = container.clientWidth || window.innerWidth || 360;
         let containerHeight = container.clientHeight || window.innerHeight || 640;
 
-        // Design width stays fixed, height adjusts to screen aspect ratio
-        const DESIGN_WIDTH = 360;
-        const DESIGN_HEIGHT = Math.round(DESIGN_WIDTH * (containerHeight / containerWidth));
+        // Detect orientation
+        const isLandscape = containerWidth > containerHeight;
+        game.isLandscape = isLandscape;
 
-        // Scale to fill screen
-        const scale = containerWidth / DESIGN_WIDTH;
+        // Base dimension is the smaller side, scale the larger side proportionally
+        let DESIGN_WIDTH, DESIGN_HEIGHT, scale;
+        if (isLandscape) {
+            DESIGN_HEIGHT = 360;
+            DESIGN_WIDTH = Math.round(DESIGN_HEIGHT * (containerWidth / containerHeight));
+            scale = containerHeight / DESIGN_HEIGHT;
+        } else {
+            DESIGN_WIDTH = 360;
+            DESIGN_HEIGHT = Math.round(DESIGN_WIDTH * (containerHeight / containerWidth));
+            scale = containerWidth / DESIGN_WIDTH;
+        }
 
         // Use device pixel ratio for crisp rendering on high-DPI screens
         const dpr = window.devicePixelRatio || 1;
@@ -601,6 +612,40 @@
         if (upgradePanel) {
             upgradePanel.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
             upgradePanel.style.transformOrigin = 'center center';
+        }
+
+        // Adjust XP bar width based on orientation
+        const xpBarContainer = document.getElementById('xp-bar-container');
+        if (xpBarContainer) {
+            xpBarContainer.style.width = isLandscape ? '40%' : '70%';
+        }
+
+        // Adjust end card image for orientation
+        const endcard = document.getElementById('cta-endcard');
+        if (endcard) {
+            endcard.style.objectFit = 'cover';
+            // Use landscape or portrait endcard based on orientation (use preloaded sprites for bundle)
+            if (isLandscape && sprites.endcard_horizontal) {
+                endcard.src = sprites.endcard_horizontal.src;
+            }
+        }
+
+        // Adjust CTA button position for landscape (top right) vs portrait (bottom center)
+        const ctaBtn = document.getElementById('cta-btn');
+        if (ctaBtn) {
+            if (isLandscape) {
+                ctaBtn.style.bottom = 'auto';
+                ctaBtn.style.top = '30px';
+                ctaBtn.style.right = '30px';
+                ctaBtn.style.left = 'auto';
+                ctaBtn.style.transform = 'none';
+            } else {
+                ctaBtn.style.top = 'auto';
+                ctaBtn.style.bottom = '40px';
+                ctaBtn.style.right = 'auto';
+                ctaBtn.style.left = '50%';
+                ctaBtn.style.transform = 'translateX(-50%)';
+            }
         }
     }
 
@@ -897,20 +942,41 @@
     // Enemies
     // ============================================
     function spawnEnemy() {
-        // Spawn from top or bottom only
-        const side = Math.floor(Math.random() * 2);
         const margin = CONFIG.ENEMY_SPAWN_MARGIN;
         let x, y;
 
-        // Spawn in middle 80% of width (10% margin on each side)
-        const minX = game.width * 0.1;
-        const maxX = game.width * 0.9;
-        x = minX + Math.random() * (maxX - minX);
-
-        if (side === 0) {
-            y = -margin; // Top
+        // In landscape, spawn from all 4 sides; in portrait, spawn from top/bottom
+        if (game.isLandscape) {
+            const side = Math.floor(Math.random() * 4);
+            if (side === 0) {
+                // Top
+                x = game.width * 0.1 + Math.random() * game.width * 0.8;
+                y = -margin;
+            } else if (side === 1) {
+                // Bottom
+                x = game.width * 0.1 + Math.random() * game.width * 0.8;
+                y = game.height + margin;
+            } else if (side === 2) {
+                // Left
+                x = -margin;
+                y = game.height * 0.1 + Math.random() * game.height * 0.8;
+            } else {
+                // Right
+                x = game.width + margin;
+                y = game.height * 0.1 + Math.random() * game.height * 0.8;
+            }
         } else {
-            y = game.height + margin; // Bottom
+            // Portrait: spawn from top or bottom only
+            const side = Math.floor(Math.random() * 2);
+            const minX = game.width * 0.1;
+            const maxX = game.width * 0.9;
+            x = minX + Math.random() * (maxX - minX);
+
+            if (side === 0) {
+                y = -margin; // Top
+            } else {
+                y = game.height + margin; // Bottom
+            }
         }
 
         // Enemy type based on phase
