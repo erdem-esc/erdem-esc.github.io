@@ -524,27 +524,30 @@
             { key: 'bgMusic', src: 'assets/bass-drive-cropped.mp3' }
         ];
         audioFiles.forEach(item => {
-            const audio = new Audio();
-            audio.src = item.src;
+            const audio = new Audio(item.src);
             audio.preload = 'auto';
+            audio.load();
             sounds[item.key] = audio;
         });
     }
 
     function playSound(key) {
         if (sounds[key]) {
-            // Clone and play to allow overlapping sounds
-            const sound = sounds[key].cloneNode();
-            sound.volume = key === 'weaponShoot' ? 0.1 : key === 'coin' ? 0.3 : 0.5;
-            sound.play().catch(() => {});
+            try {
+                const sound = sounds[key].cloneNode();
+                sound.volume = key === 'weaponShoot' ? 0.1 : key === 'coin' ? 0.3 : 0.5;
+                sound.play().catch(function(e) { console.log('Sound error:', e); });
+            } catch(e) { console.log('Sound exception:', e); }
         }
     }
 
     function playBackgroundMusic() {
         if (sounds.bgMusic) {
-            sounds.bgMusic.loop = true;
-            sounds.bgMusic.volume = 0.4;
-            sounds.bgMusic.play().catch(() => {});
+            try {
+                sounds.bgMusic.loop = true;
+                sounds.bgMusic.volume = 0.4;
+                sounds.bgMusic.play().catch(function(e) { console.log('BG music error:', e); });
+            } catch(e) { console.log('BG music exception:', e); }
         }
     }
 
