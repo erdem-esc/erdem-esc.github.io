@@ -463,6 +463,7 @@
     // Sprite Loading
     // ============================================
     const sprites = {};
+    const sounds = {};
     let spritesLoaded = false;
 
     function loadSprites(callback) {
@@ -513,6 +514,38 @@
             };
             img.src = item.src;
         });
+    }
+
+    function loadSounds() {
+        const audioFiles = [
+            { key: 'buttonClick', src: 'assets/ButtonClick.wav' },
+            { key: 'weaponShoot', src: 'assets/WeaponShoot.wav' },
+            { key: 'coin', src: 'assets/Coin.wav' },
+            { key: 'bgMusic', src: 'assets/bass-drive-cropped.mp3' }
+        ];
+        audioFiles.forEach(item => {
+            const audio = new Audio();
+            audio.src = item.src;
+            audio.preload = 'auto';
+            sounds[item.key] = audio;
+        });
+    }
+
+    function playSound(key) {
+        if (sounds[key]) {
+            // Clone and play to allow overlapping sounds
+            const sound = sounds[key].cloneNode();
+            sound.volume = key === 'weaponShoot' ? 0.1 : key === 'coin' ? 0.3 : 0.5;
+            sound.play().catch(() => {});
+        }
+    }
+
+    function playBackgroundMusic() {
+        if (sounds.bgMusic) {
+            sounds.bgMusic.loop = true;
+            sounds.bgMusic.volume = 0.4;
+            sounds.bgMusic.play().catch(() => {});
+        }
     }
 
     // ============================================
@@ -566,6 +599,7 @@
 
         setupInput();
         resetGame();
+        loadSounds();
 
         // Initialize MRAID first
         initMRAID();
@@ -684,12 +718,21 @@
         updateUI();
     }
 
+    var audioStarted = false;
+
     function startGame() {
         game.running = true;
         game.lastTime = performance.now();
 
         // Use requestAnimationFrame for game loop
         requestAnimationFrame(gameLoop);
+    }
+
+    function startAudioOnInteraction() {
+        if (!audioStarted) {
+            audioStarted = true;
+            playBackgroundMusic();
+        }
     }
 
     // ============================================
@@ -714,6 +757,7 @@
 
     function handleTouchStart(e) {
         e.preventDefault();
+        startAudioOnInteraction();
         const touch = e.touches[0];
         const rect = game.canvas.getBoundingClientRect();
         game.touch.active = true;
@@ -756,6 +800,7 @@
     }
 
     function handleMouseDown(e) {
+        startAudioOnInteraction();
         const rect = game.canvas.getBoundingClientRect();
         game.touch.active = true;
         game.touch.isDragging = false;
@@ -918,6 +963,7 @@
                 vy: (dy / dist) * CONFIG.BULLET_SPEED,
                 radius: 6
             });
+            playSound('weaponShoot');
         }
     }
 
@@ -1051,6 +1097,7 @@
 
     function collectXP() {
         game.xp++;
+        playSound('coin');
         hideCollectHint();
         updateUI();
 
@@ -1125,6 +1172,7 @@
     }
 
     function selectSkill(skillType) {
+        playSound('buttonClick');
         document.getElementById('upgrade-panel').style.display = 'none';
         game.selectedOrbitalTypes.push(skillType);
         game.paused = false;
