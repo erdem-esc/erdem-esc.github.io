@@ -1566,11 +1566,11 @@
 
         // Player animation - always on
         game.playerAnimTime += game.deltaTime;
-        game.playerAnimFrame = Math.floor(game.playerAnimTime * frameRate) % 6;
+        game.playerAnimFrame = Math.floor(game.playerAnimTime * frameRate) % 3;
 
         // Enemy animation - always running
         game.enemyAnimTime += game.deltaTime;
-        game.enemyAnimFrame = Math.floor(game.enemyAnimTime * frameRate) % 6;
+        game.enemyAnimFrame = Math.floor(game.enemyAnimTime * frameRate) % 3;
     }
 
     // ============================================
@@ -1792,9 +1792,8 @@
             }
 
             if (bulletSprite) {
-                const width = bullet.radius * 2;
-                const aspectRatio = Math.max(bulletSprite.height, bulletSprite.width) / Math.min(bulletSprite.height, bulletSprite.width);
-                const height = width * aspectRatio;
+                const width = bullet.radius * 3;
+                const height = width * (bulletSprite.height / bulletSprite.width);
                 const angle = Math.atan2(bullet.vy, bullet.vx);
                 ctx.save();
                 ctx.translate(bullet.x, bullet.y);
