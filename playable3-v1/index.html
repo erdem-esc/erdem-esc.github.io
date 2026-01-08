@@ -41,7 +41,9 @@
             position: absolute;
             pointer-events: none;
             overflow: visible;
-            /* Dimensions and transform set dynamically in JS */
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
         }
         #upgrade-panel {
             position: absolute;
@@ -209,7 +211,7 @@
         }
         #tutorial-hint {
             position: absolute;
-            bottom: 15%;
+            bottom: 27.5%;
             left: 50%;
             transform: translateX(-50%);
             color: rgba(255,255,255,0.8);
@@ -219,20 +221,6 @@
             text-align: center;
             white-space: nowrap;
             animation: fadeInOut 2s infinite;
-        }
-        #collect-hint {
-            position: absolute;
-            bottom: 15%;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255,255,255,0.8);
-            font-family: 'Lilita One', cursive;
-            font-size: 40px;
-            font-weight: bold;
-            text-align: center;
-            white-space: nowrap;
-            animation: fadeInOut 2s infinite;
-            display: none;
         }
         @keyframes fadeInOut {
             0%, 100% { opacity: 0.5; }
@@ -304,7 +292,6 @@
                 <span id="level-display">LVL 1</span>
             </div>
             <div id="tutorial-hint">Drag to move</div>
-            <div id="collect-hint">Collect soul gems</div>
             <div id="upgrade-panel">
                 <div class="level-up-banner">Level Up</div>
                 <div class="subtitle">Choose a new item!</div>
@@ -403,30 +390,28 @@
         STORE_URL_ANDROID: 'https://play.google.com/store/apps/details?id=com.escape.portalsurvivor',
 
         // Gameplay tuning
-        PLAYER_SPEED: 2,
+        PLAYER_SPEED: 3,
         BULLET_SPEED: 3,
         BULLET_FIRE_RATE: 0.5, // seconds between shots
-        ENEMY_SPEED: 1.2,
+        ENEMY_SPEED: 1,
         ENEMY_SPAWN_MARGIN: 10, // distance outside screen to spawn enemies
         XP_ATTRACT_SPEED: 8,
         XP_ATTRACT_RADIUS: 80,
 
         // XP required for each level up
-        XP_TO_LEVEL_2: 5,
-        XP_TO_LEVEL_3: 12,
+        XP_TO_LEVEL_2: 8,
+        XP_TO_LEVEL_3: 20,
+        XP_TO_LEVEL_4: 30,  // CTA triggers at level 4
 
         // Enemy spawn rates (enemies per second) by phase
         SPAWN_RATE_PHASE_1: 2,   // Before first upgrade
         SPAWN_RATE_PHASE_2: 3,   // After first upgrade
-        SPAWN_RATE_PHASE_3: 5,   // After second upgrade
-
-        // CTA triggers after this many kills post-second-upgrade
-        CTA_KILLS_AFTER_UPGRADE: 25,
+        SPAWN_RATE_PHASE_3: 4,   // After second upgrade
 
         // Max enemies on screen by phase
-        MAX_ENEMIES_PHASE_1: 8,
-        MAX_ENEMIES_PHASE_2: 20,
-        MAX_ENEMIES_PHASE_3: 40,
+        MAX_ENEMIES_PHASE_1: 5,
+        MAX_ENEMIES_PHASE_2: 10,
+        MAX_ENEMIES_PHASE_3: 15,
 
         // Orbital settings
         ORBITAL_COUNT: 1,
@@ -453,7 +438,7 @@
         // Sprite paths
         SPRITES: {
             xpOrb: 'assets/Xpgem.png',
-            background: 'assets/map.png',
+            background: 'assets/map_long.png',
             bullet: 'assets/bullet.png',
             enemy1: 'assets/enemy1.png',
             enemy2: 'assets/enemy2.png',
@@ -469,11 +454,43 @@
     const sounds = {};
     let spritesLoaded = false;
 
+    // Animation frames
+    const charWalkFrames = [];
+    const goblinWalkFrames = [];
+    const rangeWalkFrames = [];
+    const skeletonWalkFrames = [];
+    const CHAR_WALK_PATHS = ['assets/chars/Character_walk0000.png', 'assets/chars/Character_walk0004.png', 'assets/chars/Character_walk0008.png', 'assets/chars/Character_walk0012.png', 'assets/chars/Character_walk0016.png', 'assets/chars/Character_walk0021.png'];
+    const GOBLIN_WALK_PATHS = ['assets/chars/Goblin_walk_0000.png', 'assets/chars/Goblin_walk_0002.png', 'assets/chars/Goblin_walk_0004.png', 'assets/chars/Goblin_walk_0006.png', 'assets/chars/Goblin_walk_0008.png', 'assets/chars/Goblin_walk_0010.png'];
+    const RANGE_WALK_PATHS = ['assets/chars/Range_Walk0000.png', 'assets/chars/Range_Walk0002.png', 'assets/chars/Range_Walk0004.png', 'assets/chars/Range_Walk0006.png', 'assets/chars/Range_Walk0008.png', 'assets/chars/Range_Walk0010.png'];
+    const SKELETON_WALK_PATHS = ['assets/chars/Sekeleton_walk0000.png', 'assets/chars/Sekeleton_walk0002.png', 'assets/chars/Sekeleton_walk0004.png', 'assets/chars/Sekeleton_walk0006.png', 'assets/chars/Sekeleton_walk0008.png', 'assets/chars/Sekeleton_walk0010.png'];
+    const EXPLOSION_PATHS = {
+        fire: ['assets/explodes/fire-1.png', 'assets/explodes/fire-2.png', 'assets/explodes/fire-3.png', 'assets/explodes/fire-4.png', 'assets/explodes/fire-5.png', 'assets/explodes/fire-6.png'],
+        ice: ['assets/explodes/ice-1.png', 'assets/explodes/ice-2.png', 'assets/explodes/ice-3.png', 'assets/explodes/ice-4.png', 'assets/explodes/ice-5.png', 'assets/explodes/ice-6.png'],
+        poison: ['assets/explodes/poison-1.png', 'assets/explodes/poison-2.png', 'assets/explodes/poison-3.png', 'assets/explodes/poison-4.png', 'assets/explodes/poison-5.png', 'assets/explodes/poison-6.png'],
+        shock: ['assets/explodes/shock-1.png', 'assets/explodes/shock-2.png', 'assets/explodes/shock-3.png', 'assets/explodes/shock-4.png', 'assets/explodes/shock-5.png', 'assets/explodes/shock-6.png']
+    };
+
+    // Explosion frames per element type (6 frames each)
+    const explosionFrames = {
+        fire: [],
+        ice: [],
+        poison: [],
+        shock: []
+    };
+    const EXPLOSION_TYPES = ['fire', 'ice', 'poison', 'shock'];
+    const EXPLOSION_FRAME_COUNT = 6;
+    let explosionIndex = 0; // Cycle through selected orbital types
+    let bulletIndex = 0; // Cycle through selected orbital types for bullets
+
     function loadSprites(callback) {
         const toLoad = [
             { key: 'xpOrb', src: CONFIG.SPRITES.xpOrb },
             { key: 'background', src: CONFIG.SPRITES.background },
             { key: 'bullet', src: CONFIG.SPRITES.bullet },
+            { key: 'bullet_fire', src: 'assets/bullet-fire.png' },
+            { key: 'bullet_ice', src: 'assets/bullet-ice.png' },
+            { key: 'bullet_poison', src: 'assets/bullet-poison.png' },
+            { key: 'bullet_shock', src: 'assets/bullet-shock.png' },
             { key: 'enemy1', src: CONFIG.SPRITES.enemy1 },
             { key: 'enemy2', src: CONFIG.SPRITES.enemy2 },
             { key: 'enemy3', src: CONFIG.SPRITES.enemy3 },
@@ -482,9 +499,40 @@
             { key: 'orbital_ice', src: CONFIG.ORBITAL_TYPES.ice.orbSprite },
             { key: 'orbital_poison', src: CONFIG.ORBITAL_TYPES.poison.orbSprite },
             { key: 'orbital_shock', src: CONFIG.ORBITAL_TYPES.shock.orbSprite },
+            { key: 'bullets_fire', src: 'assets/burning_bullets.png' },
+            { key: 'bullets_ice', src: 'assets/freezing_bullets.png' },
+            { key: 'bullets_poison', src: 'assets/poisonous_bullets.png' },
+            { key: 'bullets_shock', src: 'assets/shocking_bullets.png' },
             { key: 'endcard_horizontal', src: 'assets/ps-endcard-horizontal-image.png' },
             { key: 'endcard_vertical', src: 'assets/ps-endcard-vertical-image.png' }
         ];
+
+        // Add character walk frames
+        CHAR_WALK_PATHS.forEach((path, idx) => {
+            toLoad.push({ key: 'char_walk_' + idx, src: path });
+        });
+
+        // Add goblin walk frames (enemy1)
+        GOBLIN_WALK_PATHS.forEach((path, idx) => {
+            toLoad.push({ key: 'goblin_walk_' + idx, src: path });
+        });
+
+        // Add range walk frames (enemy2)
+        RANGE_WALK_PATHS.forEach((path, idx) => {
+            toLoad.push({ key: 'range_walk_' + idx, src: path });
+        });
+
+        // Add skeleton walk frames (enemy3)
+        SKELETON_WALK_PATHS.forEach((path, idx) => {
+            toLoad.push({ key: 'skeleton_walk_' + idx, src: path });
+        });
+
+        // Add explosion frames for each element type
+        EXPLOSION_TYPES.forEach(type => {
+            EXPLOSION_PATHS[type].forEach((path, i) => {
+                toLoad.push({ key: 'explosion_' + type + '_' + (i + 1), src: path });
+            });
+        });
 
         let loaded = 0;
         const total = toLoad.length;
@@ -494,6 +542,29 @@
             if (!callbackCalled) {
                 callbackCalled = true;
                 spritesLoaded = true;
+
+                // Populate animation frame arrays
+                for (let i = 0; i < CHAR_WALK_PATHS.length; i++) {
+                    if (sprites['char_walk_' + i]) charWalkFrames.push(sprites['char_walk_' + i]);
+                }
+                for (let i = 0; i < GOBLIN_WALK_PATHS.length; i++) {
+                    if (sprites['goblin_walk_' + i]) goblinWalkFrames.push(sprites['goblin_walk_' + i]);
+                }
+                for (let i = 0; i < RANGE_WALK_PATHS.length; i++) {
+                    if (sprites['range_walk_' + i]) rangeWalkFrames.push(sprites['range_walk_' + i]);
+                }
+                for (let i = 0; i < SKELETON_WALK_PATHS.length; i++) {
+                    if (sprites['skeleton_walk_' + i]) skeletonWalkFrames.push(sprites['skeleton_walk_' + i]);
+                }
+                // Populate explosion frames for each element type
+                EXPLOSION_TYPES.forEach(type => {
+                    EXPLOSION_PATHS[type].forEach((path, i) => {
+                        if (sprites['explosion_' + type + '_' + (i + 1)]) {
+                            explosionFrames[type].push(sprites['explosion_' + type + '_' + (i + 1)]);
+                        }
+                    });
+                });
+
                 callback();
             }
         }
@@ -523,9 +594,8 @@
     function loadSounds() {
         const audioFiles = [
             { key: 'buttonClick', src: 'assets/ButtonClick.wav' },
-            { key: 'weaponShoot', src: 'assets/WeaponShoot.wav' },
-            { key: 'coin', src: 'assets/Coin.wav' },
-            { key: 'bgMusic', src: 'assets/bass-drive-cropped.mp3' }
+            { key: 'explosion', src: 'assets/weapon3.mp3' },
+            { key: 'coin', src: 'assets/Coin.wav' }
         ];
         audioFiles.forEach(item => {
             const audio = new Audio(item.src);
@@ -539,19 +609,10 @@
         if (sounds[key]) {
             try {
                 const sound = sounds[key].cloneNode();
-                sound.volume = key === 'weaponShoot' ? 0.1 : key === 'coin' ? 0.3 : 0.5;
-                sound.play().catch(function(e) { console.log('Sound error:', e); });
-            } catch(e) { console.log('Sound exception:', e); }
-        }
-    }
-
-    function playBackgroundMusic() {
-        if (sounds.bgMusic) {
-            try {
-                sounds.bgMusic.loop = true;
-                sounds.bgMusic.volume = 0.4;
-                sounds.bgMusic.play().catch(function(e) { console.log('BG music error:', e); });
-            } catch(e) { console.log('BG music exception:', e); }
+                sound.volume = key === 'explosion' ? 0.3 : key === 'coin' ? 0.3 : 0.5;
+                if (key === 'explosion') sound.currentTime = 0.2; // Skip silent part
+                sound.play().catch(function(e) {});
+            } catch(e) {}
         }
     }
 
@@ -579,10 +640,18 @@
         enemies: [],
         xpOrbs: [],
         orbitals: [],
+        explosions: [],
 
         // Timers
         fireTimer: 0,
         spawnTimer: 0,
+        backgroundY: 0, // Background scroll offset
+
+        // Animation state
+        playerAnimTime: 0,
+        playerAnimFrame: 0,
+        enemyAnimTime: 0,
+        enemyAnimFrame: 0,
 
         // Progression
         xp: 0,
@@ -591,7 +660,16 @@
         killsAfterSecondUpgrade: 0, // Track kills after both upgrades for CTA
         selectedOrbitalTypes: [], // Track which orbital types player has chosen
         tutorialShown: true,
-        ctaShown: false
+        ctaShown: false,
+        waitingForExplosions: false,
+
+        // Bar selection system
+        barSelectionActive: false,
+        barOptions: [], // [{type, width, icon, name}]
+        barSelectionComplete: false,
+        barWinnerAnimation: 0, // Timer for winner celebration animation
+        barWinnerType: null, // The winning bar type
+        barY: 0 // Y position of bars (starts from top, moves down)
     };
 
     // ============================================
@@ -618,28 +696,31 @@
     }
 
     function resizeCanvas() {
-        // Use actual screen dimensions to fill the entire screen
-        const container = document.getElementById('game-container');
-        let containerWidth = container.clientWidth || window.innerWidth || 360;
-        let containerHeight = container.clientHeight || window.innerHeight || 640;
+        let screenWidth = window.innerWidth || 360;
+        let screenHeight = window.innerHeight || 640;
 
-        // Detect orientation
-        const isLandscape = containerWidth > containerHeight;
-        game.isLandscape = isLandscape;
+        const isLandscape = screenWidth > screenHeight;
+        game.isLandscape = false; // Always treat as portrait for gameplay
 
-        // Base dimension is the smaller side, scale the larger side proportionally
-        let DESIGN_WIDTH, DESIGN_HEIGHT, scale;
+        let DESIGN_WIDTH, DESIGN_HEIGHT, displayWidth, displayHeight, scale;
+
         if (isLandscape) {
-            DESIGN_HEIGHT = 360;
-            DESIGN_WIDTH = Math.round(DESIGN_HEIGHT * (containerWidth / containerHeight));
-            scale = containerHeight / DESIGN_HEIGHT;
-        } else {
+            // Landscape screen: force 9:16 aspect ratio, centered
             DESIGN_WIDTH = 360;
-            DESIGN_HEIGHT = Math.round(DESIGN_WIDTH * (containerHeight / containerWidth));
-            scale = containerWidth / DESIGN_WIDTH;
+            DESIGN_HEIGHT = 640;
+            displayHeight = screenHeight;
+            displayWidth = displayHeight * (9 / 16);
+            scale = displayWidth / DESIGN_WIDTH;
+        } else {
+            // Portrait screen: use full screen resolution
+            DESIGN_WIDTH = 360;
+            DESIGN_HEIGHT = Math.round(DESIGN_WIDTH * (screenHeight / screenWidth));
+            displayWidth = screenWidth;
+            displayHeight = screenHeight;
+            scale = screenWidth / DESIGN_WIDTH;
         }
 
-        // Use device pixel ratio for crisp rendering on high-DPI screens
+        // Use device pixel ratio for crisp rendering
         const dpr = window.devicePixelRatio || 1;
 
         // Set canvas to design resolution * device pixel ratio
@@ -651,69 +732,59 @@
         // Scale context to match device pixel ratio
         game.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-        // Scale canvas to fill container via CSS
-        game.canvas.style.width = containerWidth + 'px';
-        game.canvas.style.height = containerHeight + 'px';
+        // Scale canvas via CSS
+        game.canvas.style.width = displayWidth + 'px';
+        game.canvas.style.height = displayHeight + 'px';
 
-        // Position UI layer to match canvas (full screen)
+        // Position UI layer to match canvas
         const uiLayer = document.getElementById('ui-layer');
-        uiLayer.style.left = '0px';
-        uiLayer.style.top = '0px';
-        uiLayer.style.width = containerWidth + 'px';
-        uiLayer.style.height = containerHeight + 'px';
+        uiLayer.style.width = displayWidth + 'px';
+        uiLayer.style.height = displayHeight + 'px';
 
         // Store scale for input coordinate conversion and UI scaling
         game.scale = scale;
 
-        // Apply scale to upgrade panel (combine with centering transform)
+        // Apply scale to upgrade panel
         const upgradePanel = document.getElementById('upgrade-panel');
         if (upgradePanel) {
             upgradePanel.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
             upgradePanel.style.transformOrigin = 'center center';
         }
 
-        // Adjust XP bar width based on orientation
+        // XP bar width
         const xpBarContainer = document.getElementById('xp-bar-container');
         if (xpBarContainer) {
-            xpBarContainer.style.width = isLandscape ? '40%' : '70%';
+            xpBarContainer.style.width = '70%';
         }
 
-        // Adjust end card image for orientation
+        // Always use vertical endcard
         const endcard = document.getElementById('cta-endcard');
-        if (endcard) {
-            endcard.style.objectFit = 'cover';
-            // Use landscape or portrait endcard based on orientation (use preloaded sprites for bundle)
-            if (isLandscape && sprites.endcard_horizontal) {
-                endcard.src = sprites.endcard_horizontal.src;
-            } else if (sprites.endcard_vertical) {
-                endcard.src = sprites.endcard_vertical.src;
-            }
+        if (endcard && sprites.endcard_vertical) {
+            endcard.src = sprites.endcard_vertical.src;
         }
 
-        // Adjust CTA button position for landscape (top right) vs portrait (bottom center)
+        // CTA button always in portrait position
         const ctaBtn = document.getElementById('cta-btn');
         if (ctaBtn) {
-            if (isLandscape) {
-                ctaBtn.classList.add('landscape');
-            } else {
-                ctaBtn.classList.remove('landscape');
-            }
+            ctaBtn.classList.remove('landscape');
         }
     }
 
     function resetGame() {
         game.player = {
             x: game.width / 2,
-            y: game.height / 2,
+            y: game.height - 75,
             radius: 20,
             moveDirX: 0,
-            moveDirY: 0
+            moveDirY: 0,
+            facingLeft: false
         };
 
         game.bullets = [];
         game.enemies = [];
         game.xpOrbs = [];
         game.orbitals = [];
+        game.explosions = [];
         game.xp = 0;
         game.level = 1;
         game.kills = 0;
@@ -723,6 +794,13 @@
         game.spawnTimer = 0;
         game.paused = false;
         game.ctaShown = false;
+        game.waitingForExplosions = false;
+        game.barSelectionActive = false;
+        game.barOptions = [];
+        game.barSelectionComplete = false;
+        game.barWinnerAnimation = 0;
+        game.barWinnerType = null;
+        game.barY = 0;
 
         updateUI();
     }
@@ -869,12 +947,7 @@
         if (game.tutorialShown) {
             game.tutorialShown = false;
             document.getElementById('tutorial-hint').style.display = 'none';
-            document.getElementById('collect-hint').style.display = 'block';
         }
-    }
-
-    function hideCollectHint() {
-        document.getElementById('collect-hint').style.display = 'none';
     }
 
     // ============================================
@@ -899,33 +972,50 @@
         updateBullets();
         updateEnemies();
         updateXPOrbs();
-        updateOrbitals();
+        updateAnimations();
+        updateExplosions();
+        updateBarAnimations();
+        updateBarSelection();
+        updateWinnerAnimation();
 
-        // Auto-fire
-        game.fireTimer += game.deltaTime;
-        if (game.fireTimer >= CONFIG.BULLET_FIRE_RATE) {
-            fireAtNearestEnemy();
-            game.fireTimer = 0;
+        // Scroll background slowly (no reset needed, render handles wrapping)
+        game.backgroundY += 0.6;
+
+        // Auto-fire (only after player moves for first time)
+        if (!game.tutorialShown) {
+            game.fireTimer += game.deltaTime;
+            if (game.fireTimer >= getFireInterval()) {
+                fireAtNearestEnemy();
+                game.fireTimer = 0;
+            }
+        }
+
+        // Check if waiting for explosions to finish before showing upgrade
+        if (game.waitingForExplosions && game.explosions.length === 0) {
+            game.waitingForExplosions = false;
+            if (game.level <= 2) {
+                levelUp();
+            } else if (game.level === 3 && !game.ctaShown) {
+                showCTA();
+            }
+            return;
         }
 
         // Enemy spawning - rate increases with upgrades, capped by max enemies
-        game.spawnTimer += game.deltaTime;
-        const spawnRate = getSpawnRate();
-        const spawnInterval = 1 / spawnRate; // Convert enemies/sec to seconds/enemy
-        if (game.spawnTimer >= spawnInterval) {
-            if (game.enemies.length < getMaxEnemies()) {
-                spawnEnemy();
+        // Don't spawn while waiting for explosions, during bar selection, or before first player move
+        if (!game.waitingForExplosions && !game.barSelectionActive && !game.tutorialShown) {
+            game.spawnTimer += game.deltaTime;
+            const spawnRate = getSpawnRate();
+            const spawnInterval = 1 / spawnRate;
+            if (game.spawnTimer >= spawnInterval) {
+                if (game.enemies.length < getMaxEnemies()) {
+                    spawnEnemy();
+                }
+                game.spawnTimer = 0;
             }
-            game.spawnTimer = 0;
         }
 
         checkCollisions();
-
-        // Check CTA trigger - 10 kills after second upgrade
-        if (!game.ctaShown && game.selectedOrbitalTypes.length >= 2 &&
-            game.killsAfterSecondUpgrade >= CONFIG.CTA_KILLS_AFTER_UPGRADE) {
-            showCTA();
-        }
     }
 
     function getSpawnRate() {
@@ -942,58 +1032,67 @@
         return CONFIG.MAX_ENEMIES_PHASE_1;
     }
 
+    function getFireInterval() {
+        // Fire rate increases at level up (not after upgrade selected)
+        if (game.level >= 3) return 0.2;
+        if (game.level >= 2) return 0.3;
+        return 0.4;
+    }
+
+    function getXpNeeded() {
+        if (game.level === 1) return CONFIG.XP_TO_LEVEL_2;
+        if (game.level === 2) return CONFIG.XP_TO_LEVEL_3;
+        return CONFIG.XP_TO_LEVEL_4;
+    }
+
     // ============================================
     // Player
     // ============================================
     function updatePlayer() {
-        const minX = game.width * 0.05;
-        const maxX = game.width * 0.95;
+        const minX = game.width * 0.15;
+        const maxX = game.width * 0.85;
 
-        // Move in the current direction while dragging
-        if (game.player.moveDirX !== 0 || game.player.moveDirY !== 0) {
+        // Move horizontally only (arcade style)
+        if (game.player.moveDirX !== 0) {
             const speed = CONFIG.PLAYER_SPEED;
             game.player.x += game.player.moveDirX * speed;
-            game.player.y += game.player.moveDirY * speed;
+
+            // Track facing direction
+            if (game.player.moveDirX < 0) {
+                game.player.facingLeft = true;
+            } else if (game.player.moveDirX > 0) {
+                game.player.facingLeft = false;
+            }
         }
 
-        // Keep player in bounds
+        // Keep player in horizontal bounds only (y is fixed)
         game.player.x = Math.max(minX, Math.min(maxX, game.player.x));
-        game.player.y = Math.max(game.player.radius, Math.min(game.height - game.player.radius, game.player.y));
     }
 
     // ============================================
     // Bullets
     // ============================================
     function fireAtNearestEnemy() {
-        if (game.enemies.length === 0) return;
-
-        // Find nearest enemy
-        let nearest = null;
-        let nearestDist = Infinity;
-
-        for (const enemy of game.enemies) {
-            const dx = enemy.x - game.player.x;
-            const dy = enemy.y - game.player.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < nearestDist) {
-                nearestDist = dist;
-                nearest = enemy;
-            }
+        // Determine bullet type based on selected orbitals
+        let bulletType = null; // Default (standard bullet)
+        if (game.selectedOrbitalTypes.length > 0) {
+            bulletType = game.selectedOrbitalTypes[bulletIndex % game.selectedOrbitalTypes.length];
+            bulletIndex++;
         }
 
-        if (nearest) {
-            const dx = nearest.x - game.player.x;
-            const dy = nearest.y - game.player.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+        // Fire straight up
+        game.bullets.push({
+            x: game.player.x,
+            y: game.player.y,
+            vx: 0,
+            vy: -CONFIG.BULLET_SPEED,
+            radius: 6,
+            type: bulletType
+        });
 
-            game.bullets.push({
-                x: game.player.x,
-                y: game.player.y,
-                vx: (dx / dist) * CONFIG.BULLET_SPEED,
-                vy: (dy / dist) * CONFIG.BULLET_SPEED,
-                radius: 6
-            });
-            playSound('weaponShoot');
+        // Update bar selection if active
+        if (game.barSelectionActive) {
+            increaseBarForPosition(game.player.x);
         }
     }
 
@@ -1016,41 +1115,12 @@
     // ============================================
     function spawnEnemy() {
         const margin = CONFIG.ENEMY_SPAWN_MARGIN;
-        let x, y;
 
-        // In landscape, spawn from all 4 sides; in portrait, spawn from top/bottom
-        if (game.isLandscape) {
-            const side = Math.floor(Math.random() * 4);
-            if (side === 0) {
-                // Top
-                x = game.width * 0.1 + Math.random() * game.width * 0.8;
-                y = -margin;
-            } else if (side === 1) {
-                // Bottom
-                x = game.width * 0.1 + Math.random() * game.width * 0.8;
-                y = game.height + margin;
-            } else if (side === 2) {
-                // Left
-                x = -margin;
-                y = game.height * 0.1 + Math.random() * game.height * 0.8;
-            } else {
-                // Right
-                x = game.width + margin;
-                y = game.height * 0.1 + Math.random() * game.height * 0.8;
-            }
-        } else {
-            // Portrait: spawn from top or bottom only
-            const side = Math.floor(Math.random() * 2);
-            const minX = game.width * 0.1;
-            const maxX = game.width * 0.9;
-            x = minX + Math.random() * (maxX - minX);
-
-            if (side === 0) {
-                y = -margin; // Top
-            } else {
-                y = game.height + margin; // Bottom
-            }
-        }
+        // Always spawn from top only (arcade style)
+        const minX = game.width * 0.1;
+        const maxX = game.width * 0.9;
+        const x = minX + Math.random() * (maxX - minX);
+        const y = -margin;
 
         // Enemy type based on phase
         const upgradeCount = game.selectedOrbitalTypes.length;
@@ -1074,7 +1144,7 @@
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist > 0) {
-                enemy.x += (dx / dist) * CONFIG.ENEMY_SPEED;
+                enemy.x += (dx / dist) * CONFIG.ENEMY_SPEED * 2; // 2x faster horizontal
                 enemy.y += (dy / dist) * CONFIG.ENEMY_SPEED;
             }
         }
@@ -1083,12 +1153,17 @@
     function killEnemy(index) {
         const enemy = game.enemies[index];
 
+        // Spawn explosion at enemy position
+        spawnExplosion(enemy.x, enemy.y);
+
         // Spawn XP orb - clamp to visible area
         const padding = 10;
         game.xpOrbs.push({
             x: Math.max(padding, Math.min(game.width - padding, enemy.x)),
             y: Math.max(padding, Math.min(game.height - padding, enemy.y)),
-            radius: 8
+            radius: 8,
+            timer: 0,
+            phase: 0  // 0 = delay, 1 = move away, 2 = move toward player
         });
 
         game.enemies.splice(index, 1);
@@ -1111,10 +1186,30 @@
             const dy = game.player.y - orb.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
-            // Attract toward player when close
-            if (dist < CONFIG.XP_ATTRACT_RADIUS) {
-                orb.x += (dx / dist) * CONFIG.XP_ATTRACT_SPEED;
-                orb.y += (dy / dist) * CONFIG.XP_ATTRACT_SPEED;
+            // Update timer and phase
+            orb.timer += game.deltaTime;
+
+            if (orb.phase === 0) {
+                // Phase 0: Delay (0.1 sec) - stay still
+                if (orb.timer >= 0.1) {
+                    orb.timer = 0;
+                    orb.phase = 1;
+                }
+            } else if (orb.phase === 1) {
+                // Phase 1: Move away from player (0.1 sec)
+                if (dist > 0) {
+                    orb.x -= (dx / dist) * CONFIG.XP_ATTRACT_SPEED * 0.1;
+                    orb.y -= (dy / dist) * CONFIG.XP_ATTRACT_SPEED * 0.1;
+                }
+                if (orb.timer >= 0.1) {
+                    orb.phase = 2;
+                }
+            } else {
+                // Phase 2: Fly toward player
+                if (dist > 0) {
+                    orb.x += (dx / dist) * CONFIG.XP_ATTRACT_SPEED;
+                    orb.y += (dy / dist) * CONFIG.XP_ATTRACT_SPEED;
+                }
             }
 
             // Collect XP
@@ -1126,24 +1221,56 @@
     }
 
     function collectXP() {
+        // Don't count XP during bar selection
+        if (game.barSelectionActive) {
+            playSound('coin');
+            return;
+        }
+
         game.xp++;
         playSound('coin');
-        hideCollectHint();
         updateUI();
 
-        // Level up with different XP thresholds
-        const xpNeeded = game.level === 1 ? CONFIG.XP_TO_LEVEL_2 : CONFIG.XP_TO_LEVEL_3;
-        if (game.xp >= xpNeeded && game.level <= 2) {
-            levelUp();
+        // Check if XP threshold reached
+        if (game.xp >= getXpNeeded() && !game.waitingForExplosions) {
+            // Kill all remaining enemies on screen
+            killAllEnemies();
+            game.waitingForExplosions = true;
         }
+    }
+
+    function killAllEnemies() {
+        // Kill all enemies and spawn explosions (no XP orbs)
+        // For first upgrade (no orbitals selected yet), force fire explosions
+        const forceFireExplosion = game.selectedOrbitalTypes.length === 0;
+
+        for (const enemy of game.enemies) {
+            if (forceFireExplosion) {
+                spawnExplosionOfType(enemy.x, enemy.y, 'fire');
+            } else {
+                spawnExplosion(enemy.x, enemy.y);
+            }
+        }
+        game.enemies = [];
+    }
+
+    function spawnExplosionOfType(x, y, explosionType) {
+        game.explosions.push({
+            x: x,
+            y: y,
+            frame: 0,
+            timer: 0,
+            size: 135,
+            type: explosionType
+        });
+        playSound('explosion');
     }
 
     function levelUp() {
         game.level++;
         game.xp = 0;
-        game.paused = true;
         updateUI();
-        showSkillSelection();
+        startBarSelection();
     }
 
     function showSkillSelection() {
@@ -1191,7 +1318,7 @@
             // Add description
             const descSpan = document.createElement('span');
             descSpan.className = 'description';
-            descSpan.textContent = skill.description || 'Orbitals around you';
+            descSpan.textContent = skill.description || 'Elemental power';
             btn.appendChild(descSpan);
 
             btn.addEventListener('click', () => selectSkill(skillType));
@@ -1206,9 +1333,163 @@
         document.getElementById('upgrade-panel').style.display = 'none';
         game.selectedOrbitalTypes.push(skillType);
         game.paused = false;
+        // No orbitals in this version - just bullet/explosion colors change
+    }
 
-        // Regenerate all orbitals to ensure proper spacing
-        regenerateOrbitals();
+    function startBarSelection() {
+        game.barSelectionActive = true;
+        game.barSelectionComplete = false;
+        game.barY = -100; // Start above the screen
+
+        let availableSkills = [];
+        if (game.selectedOrbitalTypes.length === 0) {
+            availableSkills = ['fire', 'ice', 'poison'];
+        } else {
+            const firstPick = game.selectedOrbitalTypes[0];
+            availableSkills = ['fire', 'ice', 'poison'].filter(s => s !== firstPick);
+            availableSkills.push('shock');
+        }
+
+        // Initialize bars with equal width (33.3% each)
+        game.barOptions = availableSkills.map(type => ({
+            type: type,
+            width: 33.33,
+            name: CONFIG.ORBITAL_TYPES[type].name,
+            color: CONFIG.ORBITAL_TYPES[type].color,
+            animTimer: 0,
+            isHit: false
+        }));
+    }
+
+    function updateBarSelection() {
+        if (!game.barSelectionActive || game.barSelectionComplete) return;
+
+        // Move bars down at same speed as background
+        if (!game.barWinnerType) {
+            game.barY += 0.75;
+        }
+
+        // Check if we have a winner (two bars at 0)
+        const activeBars = game.barOptions.filter(b => b.width > 0);
+        if (activeBars.length === 1 && !game.barWinnerType) {
+            // Start winner animation
+            game.barWinnerType = activeBars[0].type;
+            game.barWinnerAnimation = 0.6; // Duration of winner animation
+            activeBars[0].animTimer = 0.6; // Trigger big animation
+            activeBars[0].isHit = true;
+            return;
+        }
+
+        // Check if bars reached player (player touches the bar)
+        const barHeight = 100;
+        const playerTopY = game.player.y - 40; // Approximate top of player
+        if (game.barY + barHeight >= playerTopY && !game.barWinnerType) {
+            // Find which bar the player is touching based on position
+            const totalWidth = game.width * 0.76;
+            const startX = game.width * 0.12;
+            const relativeX = (game.player.x - startX) / totalWidth;
+            const clampedX = Math.max(0, Math.min(1, relativeX));
+
+            let accumulatedWidth = 0;
+            let touchedBar = null;
+            for (let i = 0; i < game.barOptions.length; i++) {
+                const barWidthPercent = game.barOptions[i].width / 100;
+                if (game.barOptions[i].width > 0 && clampedX < accumulatedWidth + barWidthPercent) {
+                    touchedBar = game.barOptions[i];
+                    break;
+                }
+                accumulatedWidth += barWidthPercent;
+                if (game.barOptions[i].width > 0) touchedBar = game.barOptions[i];
+            }
+
+            if (touchedBar) {
+                // Start winner animation for touched bar
+                game.barWinnerType = touchedBar.type;
+                game.barWinnerAnimation = 0.6;
+                touchedBar.animTimer = 0.6;
+                touchedBar.isHit = true;
+            }
+        }
+    }
+
+    function updateWinnerAnimation() {
+        if (!game.barWinnerType || game.barSelectionComplete) return;
+
+        game.barWinnerAnimation -= game.deltaTime;
+        if (game.barWinnerAnimation <= 0) {
+            game.barSelectionComplete = true;
+            game.selectedOrbitalTypes.push(game.barWinnerType);
+            game.barSelectionActive = false;
+            game.barOptions = [];
+            game.barWinnerType = null;
+        }
+    }
+
+    function increaseBarForPosition(playerX) {
+        if (!game.barSelectionActive || game.barSelectionComplete || game.barWinnerType) return;
+
+        // Determine which bar to increase based on player position relative to actual bar widths
+        const totalWidth = game.width * 0.76;
+        const startX = game.width * 0.12;
+
+        // Convert player position to position within bar area (0 to 1)
+        const relativeX = (playerX - startX) / totalWidth;
+        const clampedX = Math.max(0, Math.min(1, relativeX));
+
+        // Find which bar the position falls into based on actual widths
+        let barIndex = 0;
+        let accumulatedWidth = 0;
+        for (let i = 0; i < game.barOptions.length; i++) {
+            const barWidthPercent = game.barOptions[i].width / 100;
+            if (clampedX < accumulatedWidth + barWidthPercent) {
+                barIndex = i;
+                break;
+            }
+            accumulatedWidth += barWidthPercent;
+            barIndex = i; // Default to last bar if we go past
+        }
+
+        // Only increase if bar still active
+        if (game.barOptions[barIndex] && game.barOptions[barIndex].width > 0) {
+            // 5% increase for first upgrade, 3% for second
+            const increaseAmount = game.selectedOrbitalTypes.length === 0 ? 5 : 3;
+            game.barOptions[barIndex].width += increaseAmount;
+
+            // Decrease others proportionally
+            const othersToDecrease = game.barOptions.filter((b, i) => i !== barIndex && b.width > 0);
+            const decreaseAmount = increaseAmount / othersToDecrease.length;
+
+            othersToDecrease.forEach(bar => {
+                bar.width = Math.max(0, bar.width - decreaseAmount);
+            });
+
+            // Normalize to ensure total is 100%
+            const total = game.barOptions.reduce((sum, b) => sum + b.width, 0);
+            if (total > 0) {
+                game.barOptions.forEach(b => {
+                    b.width = (b.width / total) * 100;
+                });
+            }
+
+            // Trigger animation on all bars
+            game.barOptions.forEach((bar, i) => {
+                bar.animTimer = 0.15; // Animation duration
+                bar.isHit = (i === barIndex); // Mark the hit bar
+            });
+        }
+
+        updateBarSelection();
+    }
+
+    function updateBarAnimations() {
+        if (!game.barSelectionActive) return;
+
+        for (const bar of game.barOptions) {
+            if (bar.animTimer > 0) {
+                bar.animTimer -= game.deltaTime;
+                if (bar.animTimer < 0) bar.animTimer = 0;
+            }
+        }
     }
 
     function regenerateOrbitals() {
@@ -1225,10 +1506,67 @@
             game.orbitals.push({
                 angle: baseAngle,
                 radius: 12,  // Individual orb radius for collision detection
-                imageSize: 125,  // Size to draw the grouped orbital image
+                imageSize: 150,  // Size to draw the grouped orbital image
                 type: skillType,
                 color: color
             });
+        }
+    }
+
+    // ============================================
+    // Animations
+    // ============================================
+    function updateAnimations() {
+        const frameRate = 8;
+
+        // Player animation - always on
+        game.playerAnimTime += game.deltaTime;
+        game.playerAnimFrame = Math.floor(game.playerAnimTime * frameRate) % 6;
+
+        // Enemy animation - always running
+        game.enemyAnimTime += game.deltaTime;
+        game.enemyAnimFrame = Math.floor(game.enemyAnimTime * frameRate) % 6;
+    }
+
+    // ============================================
+    // Explosions
+    // ============================================
+    function spawnExplosion(x, y) {
+        // No explosion before first orbital is selected
+        if (game.selectedOrbitalTypes.length === 0) return;
+
+        // Cycle through selected orbital types
+        const explosionType = game.selectedOrbitalTypes[explosionIndex % game.selectedOrbitalTypes.length];
+        explosionIndex++;
+
+        game.explosions.push({
+            x: x,
+            y: y,
+            frame: 0,
+            timer: 0,
+            size: 135,
+            type: explosionType
+        });
+        playSound('explosion');
+    }
+
+    function updateExplosions() {
+        const frameRate = 10; // 10 FPS for explosions
+        const frameDuration = 1 / frameRate;
+
+        for (let i = game.explosions.length - 1; i >= 0; i--) {
+            const explosion = game.explosions[i];
+            explosion.timer += game.deltaTime;
+
+            if (explosion.timer >= frameDuration) {
+                explosion.timer = 0;
+                explosion.frame++;
+
+                // Remove when all 6 frames played
+                if (explosion.frame >= EXPLOSION_FRAME_COUNT) {
+                    game.explosions.splice(i, 1);
+                }
+            }
         }
     }
 
@@ -1275,40 +1613,17 @@
                 }
             }
         }
-
-        // Orbitals vs Enemies (check all 4 orb positions per orbital group)
-        if (game.orbitals.length > 0) {
-            for (const orbital of game.orbitals) {
-                const positions = getOrbitalPositions(orbital);
-
-                for (let j = game.enemies.length - 1; j >= 0; j--) {
-                    const enemy = game.enemies[j];
-                    let hit = false;
-
-                    for (const pos of positions) {
-                        const dx = pos.x - enemy.x;
-                        const dy = pos.y - enemy.y;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-
-                        if (dist < orbital.radius + enemy.radius) {
-                            hit = true;
-                            break;
-                        }
-                    }
-
-                    if (hit) {
-                        killEnemy(j);
-                    }
-                }
-            }
-        }
     }
 
     // ============================================
     // UI
     // ============================================
     function updateUI() {
-        const xpNeeded = game.level === 1 ? CONFIG.XP_TO_LEVEL_2 : CONFIG.XP_TO_LEVEL_3;
+        let xpNeeded;
+        if (game.level === 1) xpNeeded = CONFIG.XP_TO_LEVEL_2;
+        else if (game.level === 2) xpNeeded = CONFIG.XP_TO_LEVEL_3;
+        else xpNeeded = CONFIG.XP_TO_LEVEL_4;
+
         const xpPercent = (game.xp / xpNeeded) * 100;
         document.getElementById('xp-bar').style.width = xpPercent + '%';
         document.getElementById('level-display').textContent = 'LVL ' + game.level;
@@ -1338,9 +1653,21 @@
     function render() {
         const ctx = game.ctx;
 
-        // Draw background - scale to fit
+        // Draw background - scrolling down slowly, preserving aspect ratio
         if (sprites.background) {
-            ctx.drawImage(sprites.background, 0, 0, game.width, game.height);
+            const img = sprites.background;
+            // Scale to fit width, preserve aspect ratio
+            const bgWidth = game.width;
+            const bgHeight = (img.height / img.width) * bgWidth;
+
+            // Calculate starting Y position (wrap smoothly)
+            let startY = game.backgroundY % bgHeight;
+            if (startY > 0) startY -= bgHeight;
+
+            // Draw enough copies to cover the screen
+            for (let y = startY; y < game.height; y += bgHeight) {
+                ctx.drawImage(img, 0, y, bgWidth, bgHeight);
+            }
         } else {
             ctx.fillStyle = '#16213e';
             ctx.fillRect(0, 0, game.width, game.height);
@@ -1359,15 +1686,40 @@
             }
         }
 
-        // Draw enemies - preserve aspect ratio (0.5x scale)
+        // Draw enemies - preserve aspect ratio (0.5x scale) with animation
         for (const enemy of game.enemies) {
-            const spriteKey = 'enemy' + (enemy.type || 1);
-            if (sprites[spriteKey]) {
-                const img = sprites[spriteKey];
-                const scale = (enemy.radius * 2) / Math.max(img.width, img.height);
+            let enemyImg = null;
+            const enemyType = enemy.type || 1;
+
+            // Get animated frame based on enemy type
+            if (enemyType === 1 && goblinWalkFrames.length > 0) {
+                enemyImg = goblinWalkFrames[game.enemyAnimFrame];
+            } else if (enemyType === 2 && rangeWalkFrames.length > 0) {
+                enemyImg = rangeWalkFrames[game.enemyAnimFrame];
+            } else if (enemyType === 3 && skeletonWalkFrames.length > 0) {
+                enemyImg = skeletonWalkFrames[game.enemyAnimFrame];
+            } else {
+                // Fallback to static sprite
+                enemyImg = sprites['enemy' + enemyType];
+            }
+
+            if (enemyImg) {
+                const img = enemyImg;
+                // Goblin: 2, Range: 2.5, Skeleton: 5
+                const sizeMultiplier = (enemyType === 3) ? 4 : (enemyType === 2) ? 2.25 : 2;
+                const scale = (enemy.radius * sizeMultiplier) / Math.max(img.width, img.height);
                 const w = img.width * scale;
                 const h = img.height * scale;
-                ctx.drawImage(img, enemy.x - w/2, enemy.y - h/2, w, h);
+
+                // Flip sprite based on movement direction (flip when moving right)
+                const movingRight = game.player.x > enemy.x;
+                ctx.save();
+                ctx.translate(enemy.x, enemy.y);
+                if (movingRight) {
+                    ctx.scale(-1, 1);
+                }
+                ctx.drawImage(img, -w/2, -h/2, w, h);
+                ctx.restore();
             } else {
                 ctx.fillStyle = CONFIG.COLOR_ENEMY;
                 ctx.beginPath();
@@ -1376,15 +1728,31 @@
             }
         }
 
+        // Draw explosions
+        for (const explosion of game.explosions) {
+            const frames = explosionFrames[explosion.type];
+            if (frames && frames.length > 0 && explosion.frame < frames.length) {
+                const img = frames[explosion.frame];
+                const size = explosion.size;
+                ctx.drawImage(img, explosion.x - size/2, explosion.y - size/2, size, size);
+            }
+        }
+
         // Draw bullets
         for (const bullet of game.bullets) {
-            if (sprites.bullet) {
+            // Get bullet sprite based on type
+            let bulletSprite = sprites.bullet;
+            if (bullet.type && sprites['bullet_' + bullet.type]) {
+                bulletSprite = sprites['bullet_' + bullet.type];
+            }
+
+            if (bulletSprite) {
                 const size = bullet.radius * 2;
                 const angle = Math.atan2(bullet.vy, bullet.vx);
                 ctx.save();
                 ctx.translate(bullet.x, bullet.y);
                 ctx.rotate(angle);
-                ctx.drawImage(sprites.bullet, -size/2, -size/2, size, size);
+                ctx.drawImage(bulletSprite, -size/2, -size/2, size, size);
                 ctx.restore();
             } else {
                 ctx.fillStyle = CONFIG.COLOR_BULLET;
@@ -1394,13 +1762,21 @@
             }
         }
 
-        // Draw player - preserve aspect ratio (0.8x scale)
-        if (sprites.player) {
-            const img = sprites.player;
-            const scale = (game.player.radius * 2.4) / Math.max(img.width, img.height);
+        // Draw player - preserve aspect ratio (2x size) with animation, flip based on direction
+        const playerImg = charWalkFrames.length > 0 ? charWalkFrames[game.playerAnimFrame] : sprites.player;
+        if (playerImg) {
+            const img = playerImg;
+            const scale = (game.player.radius * 4) / Math.max(img.width, img.height);
             const w = img.width * scale;
             const h = img.height * scale;
-            ctx.drawImage(img, game.player.x - w/2, game.player.y - h/2, w, h);
+
+            ctx.save();
+            ctx.translate(game.player.x, game.player.y);
+            if (game.player.facingLeft) {
+                ctx.scale(-1, 1); // Flip horizontally
+            }
+            ctx.drawImage(img, -w/2, -h/2, w, h);
+            ctx.restore();
         } else {
             ctx.fillStyle = CONFIG.COLOR_PLAYER;
             ctx.beginPath();
@@ -1408,28 +1784,104 @@
             ctx.fill();
         }
 
-        // Draw orbital groups - rotate entire image around player center
-        if (game.orbitals.length > 0) {
-            for (const orbital of game.orbitals) {
-                const spriteKey = 'orbital_' + orbital.type;
-                if (sprites[spriteKey]) {
-                    // Draw the grouped orbital image centered on player, rotated
-                    const size = orbital.imageSize;
-                    ctx.save();
-                    ctx.translate(game.player.x, game.player.y);
-                    ctx.rotate(orbital.angle);
-                    ctx.drawImage(sprites[spriteKey], -size/2, -size/2, size, size);
-                    ctx.restore();
-                } else {
-                    // Fallback: draw 4 individual colored circles
-                    const positions = getOrbitalPositions(orbital);
-                    for (const pos of positions) {
-                        ctx.fillStyle = orbital.color;
-                        ctx.beginPath();
-                        ctx.arc(pos.x, pos.y, orbital.radius, 0, Math.PI * 2);
-                        ctx.fill();
+        // Draw bar selection UI
+        if (game.barSelectionActive && game.barOptions.length > 0) {
+            const barHeight = 100;
+            const barY = game.barY; // Moving from top towards player
+            const totalWidth = game.width * 0.76;
+            const startX = game.width * 0.12;
+            const iconSize = 48;
+            const borderRadius = 12;
+
+            let currentX = startX;
+
+            for (let i = 0; i < game.barOptions.length; i++) {
+                const bar = game.barOptions[i];
+                const barWidth = (bar.width / 100) * totalWidth;
+
+                if (barWidth > 2) {
+                    // Calculate animation scale (bounce effect)
+                    const isWinner = game.barWinnerType === bar.type;
+                    const animDuration = isWinner ? 0.6 : 0.15;
+                    const animProgress = Math.min(bar.animTimer / animDuration, 1); // 0 to 1
+
+                    // Winner gets one big pulse animation
+                    let animScale = 1;
+                    if (isWinner && animProgress > 0) {
+                        // Single pulse effect for winner
+                        const pulse = Math.sin(animProgress * Math.PI);
+                        animScale = 1 + pulse * 0.25;
+                    } else {
+                        const baseScale = bar.isHit ? 1.08 : 1.03;
+                        animScale = 1 + (baseScale - 1) * animProgress;
+                    }
+
+                    // Calculate animated position (centered scaling)
+                    const centerX = currentX + barWidth / 2;
+                    const centerY = barY + barHeight / 2;
+                    const animWidth = barWidth * animScale;
+                    const animHeight = barHeight * animScale;
+                    const animX = centerX - animWidth / 2;
+                    const animY = centerY - animHeight / 2;
+
+                    // Draw rounded rectangle bar background
+                    const barColors = {
+                        '#ef4444': '#dc2626', // fire - red
+                        '#3b82f6': '#38bdf8', // ice - light blue
+                        '#a855f7': '#a855f7', // poison - purple
+                        '#eab308': '#facc15'  // shock - yellow
+                    };
+                    ctx.fillStyle = barColors[bar.color] || bar.color;
+                    ctx.globalAlpha = 0.9;
+                    ctx.beginPath();
+                    ctx.roundRect(animX, animY, animWidth, animHeight, borderRadius);
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+
+                    // Draw border (size increases when animating)
+                    const borderHighlight = animProgress > 0;
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = borderHighlight ? (bar.isHit ? 4 : 3) : 2;
+                    ctx.beginPath();
+                    ctx.roundRect(animX, animY, animWidth, animHeight, borderRadius);
+                    ctx.stroke();
+
+                    // Draw icon with white rounded background if bar is wide enough
+                    if (barWidth > iconSize + 10) {
+                        const iconKey = 'bullets_' + bar.type;
+                        if (sprites[iconKey]) {
+                            const iconBgBaseSize = 50; // Fixed background size
+                            const scaledIconSize = iconSize * animScale;
+                            const scaledIconBgSize = iconBgBaseSize * animScale;
+                            const iconBgX = centerX - scaledIconBgSize / 2;
+                            const iconBgY = animY + 10 * animScale;
+
+                            // White rounded background for icon
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                            ctx.beginPath();
+                            ctx.roundRect(iconBgX, iconBgY, scaledIconBgSize, scaledIconBgSize, 8 * animScale);
+                            ctx.fill();
+
+                            // Draw icon (centered in background)
+                            const iconOffset = (scaledIconBgSize - scaledIconSize) / 2;
+                            const iconX = iconBgX + iconOffset;
+                            const iconY = iconBgY + iconOffset;
+                            ctx.drawImage(sprites[iconKey], iconX, iconY, scaledIconSize, scaledIconSize);
+                        }
+                    }
+
+                    // Draw name inside bar if bar is wide enough
+                    if (barWidth > 50) {
+                        ctx.fillStyle = '#fff';
+                        const scaledFontSize = Math.round(20 * animScale);
+                        ctx.font = 'bold ' + scaledFontSize + 'px "Lilita One", sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText(bar.name, centerX, animY + animHeight - 20 * animScale);
                     }
                 }
+
+                currentX += barWidth;
             }
         }
     }
