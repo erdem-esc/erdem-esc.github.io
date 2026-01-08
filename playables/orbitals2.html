@@ -774,11 +774,10 @@
     function resetGame() {
         game.player = {
             x: game.width / 2,
-            y: game.height - 60,
+            y: game.height / 2,
             radius: 20,
             moveDirX: 0,
-            moveDirY: 0,
-            facingLeft: false
+            moveDirY: 0
         };
 
         game.bullets = [];
@@ -971,6 +970,7 @@
         updateBullets();
         updateEnemies();
         updateXPOrbs();
+        updateOrbitals();
         updateAnimations();
         updateExplosions();
 
@@ -1016,21 +1016,16 @@
         const minX = game.width * 0.05;
         const maxX = game.width * 0.95;
 
-        // Move horizontally only (arcade style)
-        if (game.player.moveDirX !== 0) {
+        // Move in the current direction while dragging
+        if (game.player.moveDirX !== 0 || game.player.moveDirY !== 0) {
             const speed = CONFIG.PLAYER_SPEED;
             game.player.x += game.player.moveDirX * speed;
-
-            // Track facing direction
-            if (game.player.moveDirX < 0) {
-                game.player.facingLeft = true;
-            } else if (game.player.moveDirX > 0) {
-                game.player.facingLeft = false;
-            }
+            game.player.y += game.player.moveDirY * speed;
         }
 
-        // Keep player in horizontal bounds only (y is fixed)
+        // Keep player in bounds
         game.player.x = Math.max(minX, Math.min(maxX, game.player.x));
+        game.player.y = Math.max(game.player.radius, Math.min(game.height - game.player.radius, game.player.y));
     }
 
     // ============================================
@@ -1095,12 +1090,41 @@
     // ============================================
     function spawnEnemy() {
         const margin = CONFIG.ENEMY_SPAWN_MARGIN;
+        let x, y;
 
-        // Always spawn from top only (arcade style)
-        const minX = game.width * 0.1;
-        const maxX = game.width * 0.9;
-        const x = minX + Math.random() * (maxX - minX);
-        const y = -margin;
+        // In landscape, spawn from all 4 sides; in portrait, spawn from top/bottom
+        if (game.isLandscape) {
+            const side = Math.floor(Math.random() * 4);
+            if (side === 0) {
+                // Top
+                x = game.width * 0.1 + Math.random() * game.width * 0.8;
+                y = -margin;
+            } else if (side === 1) {
+                // Bottom
+                x = game.width * 0.1 + Math.random() * game.width * 0.8;
+                y = game.height + margin;
+            } else if (side === 2) {
+                // Left
+                x = -margin;
+                y = game.height * 0.1 + Math.random() * game.height * 0.8;
+            } else {
+                // Right
+                x = game.width + margin;
+                y = game.height * 0.1 + Math.random() * game.height * 0.8;
+            }
+        } else {
+            // Portrait: spawn from top or bottom only
+            const side = Math.floor(Math.random() * 2);
+            const minX = game.width * 0.1;
+            const maxX = game.width * 0.9;
+            x = minX + Math.random() * (maxX - minX);
+
+            if (side === 0) {
+                y = -margin; // Top
+            } else {
+                y = game.height + margin; // Bottom
+            }
+        }
 
         // Enemy type based on phase
         const upgradeCount = game.selectedOrbitalTypes.length;
@@ -1253,7 +1277,7 @@
             // Add description
             const descSpan = document.createElement('span');
             descSpan.className = 'description';
-            descSpan.textContent = skill.description || 'Elemental power';
+            descSpan.textContent = skill.description || 'Orbitals around you';
             btn.appendChild(descSpan);
 
             btn.addEventListener('click', () => selectSkill(skillType));
@@ -1268,7 +1292,9 @@
         document.getElementById('upgrade-panel').style.display = 'none';
         game.selectedOrbitalTypes.push(skillType);
         game.paused = false;
-        // No orbitals in this version - just bullet/explosion colors change
+
+        // Regenerate all orbitals to ensure proper spacing
+        regenerateOrbitals();
     }
 
     function regenerateOrbitals() {
@@ -1394,6 +1420,33 @@
                 }
             }
         }
+
+        // Orbitals vs Enemies (check all 4 orb positions per orbital group)
+        if (game.orbitals.length > 0) {
+            for (const orbital of game.orbitals) {
+                const positions = getOrbitalPositions(orbital);
+
+                for (let j = game.enemies.length - 1; j >= 0; j--) {
+                    const enemy = game.enemies[j];
+                    let hit = false;
+
+                    for (const pos of positions) {
+                        const dx = pos.x - enemy.x;
+                        const dy = pos.y - enemy.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < orbital.radius + enemy.radius) {
+                            hit = true;
+                            break;
+                        }
+                    }
+
+                    if (hit) {
+                        killEnemy(j);
+                    }
+                }
+            }
+        }
     }
 
     // ============================================
@@ -1479,7 +1532,16 @@
                 const scale = (enemy.radius * sizeMultiplier) / Math.max(img.width, img.height);
                 const w = img.width * scale;
                 const h = img.height * scale;
-                ctx.drawImage(img, enemy.x - w/2, enemy.y - h/2, w, h);
+
+                // Flip sprite based on movement direction (flip when moving right)
+                const movingRight = game.player.x > enemy.x;
+                ctx.save();
+                ctx.translate(enemy.x, enemy.y);
+                if (movingRight) {
+                    ctx.scale(-1, 1);
+                }
+                ctx.drawImage(img, -w/2, -h/2, w, h);
+                ctx.restore();
             } else {
                 ctx.fillStyle = CONFIG.COLOR_ENEMY;
                 ctx.beginPath();
@@ -1522,26 +1584,44 @@
             }
         }
 
-        // Draw player - preserve aspect ratio (2x size) with animation, flip based on direction
+        // Draw player - preserve aspect ratio (2x size) with animation
         const playerImg = charWalkFrames.length > 0 ? charWalkFrames[game.playerAnimFrame] : sprites.player;
         if (playerImg) {
             const img = playerImg;
             const scale = (game.player.radius * 3.5) / Math.max(img.width, img.height);
             const w = img.width * scale;
             const h = img.height * scale;
-
-            ctx.save();
-            ctx.translate(game.player.x, game.player.y);
-            if (game.player.facingLeft) {
-                ctx.scale(-1, 1); // Flip horizontally
-            }
-            ctx.drawImage(img, -w/2, -h/2, w, h);
-            ctx.restore();
+            ctx.drawImage(img, game.player.x - w/2, game.player.y - h/2, w, h);
         } else {
             ctx.fillStyle = CONFIG.COLOR_PLAYER;
             ctx.beginPath();
             ctx.arc(game.player.x, game.player.y, game.player.radius, 0, Math.PI * 2);
             ctx.fill();
+        }
+
+        // Draw orbital groups - rotate entire image around player center
+        if (game.orbitals.length > 0) {
+            for (const orbital of game.orbitals) {
+                const spriteKey = 'orbital_' + orbital.type;
+                if (sprites[spriteKey]) {
+                    // Draw the grouped orbital image centered on player, rotated
+                    const size = orbital.imageSize;
+                    ctx.save();
+                    ctx.translate(game.player.x, game.player.y);
+                    ctx.rotate(orbital.angle);
+                    ctx.drawImage(sprites[spriteKey], -size/2, -size/2, size, size);
+                    ctx.restore();
+                } else {
+                    // Fallback: draw 4 individual colored circles
+                    const positions = getOrbitalPositions(orbital);
+                    for (const pos of positions) {
+                        ctx.fillStyle = orbital.color;
+                        ctx.beginPath();
+                        ctx.arc(pos.x, pos.y, orbital.radius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
         }
     }
 
