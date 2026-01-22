@@ -729,8 +729,8 @@
             scale = screenWidth / DESIGN_WIDTH;
         }
 
-        // Use device pixel ratio for crisp rendering (limit to 1 on mobile for performance)
-        const dpr = isMobile ? 1 : (window.devicePixelRatio || 1);
+        // Use device pixel ratio for crisp rendering (cap at 2 on mobile for performance)
+        const dpr = isMobile ? Math.min(window.devicePixelRatio || 1, 2) : (window.devicePixelRatio || 1);
 
         // Set canvas to design resolution * device pixel ratio
         game.canvas.width = DESIGN_WIDTH * dpr;
@@ -998,7 +998,7 @@
         updateWinnerAnimation();
 
         // Scroll background slowly (no reset needed, render handles wrapping)
-        game.backgroundY += 0.75;
+        game.backgroundY += 0.75 * game.deltaTime * 60;
 
         // Auto-fire (only after player moves for first time)
         if (!game.tutorialShown) {
@@ -1070,11 +1070,12 @@
     function updatePlayer() {
         const minX = game.width * 0.15;
         const maxX = game.width * 0.85;
+        const timeFactor = game.deltaTime * 60; // Normalize to 60fps
 
         // Move horizontally only (arcade style)
         if (game.player.moveDirX !== 0) {
             const speed = CONFIG.PLAYER_SPEED;
-            game.player.x += game.player.moveDirX * speed;
+            game.player.x += game.player.moveDirX * speed * timeFactor;
 
             // Track facing direction
             if (game.player.moveDirX < 0) {
@@ -1116,10 +1117,11 @@
     }
 
     function updateBullets() {
+        const timeFactor = game.deltaTime * 60; // Normalize to 60fps
         for (let i = game.bullets.length - 1; i >= 0; i--) {
             const bullet = game.bullets[i];
-            bullet.x += bullet.vx;
-            bullet.y += bullet.vy;
+            bullet.x += bullet.vx * timeFactor;
+            bullet.y += bullet.vy * timeFactor;
 
             // Remove if out of bounds
             if (bullet.x < -20 || bullet.x > game.width + 20 ||
@@ -1172,14 +1174,15 @@
     }
 
     function updateEnemies() {
+        const timeFactor = game.deltaTime * 60; // Normalize to 60fps
         for (const enemy of game.enemies) {
             const dx = game.player.x - enemy.x;
             const dy = game.player.y - enemy.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist > 0) {
-                enemy.x += (dx / dist) * CONFIG.ENEMY_SPEED * 2; // 2x faster horizontal
-                enemy.y += (dy / dist) * CONFIG.ENEMY_SPEED;
+                enemy.x += (dx / dist) * CONFIG.ENEMY_SPEED * 2 * timeFactor; // 2x faster horizontal
+                enemy.y += (dy / dist) * CONFIG.ENEMY_SPEED * timeFactor;
             }
         }
     }
@@ -1213,6 +1216,7 @@
     // XP Orbs
     // ============================================
     function updateXPOrbs() {
+        const timeFactor = game.deltaTime * 60; // Normalize to 60fps
         for (let i = game.xpOrbs.length - 1; i >= 0; i--) {
             const orb = game.xpOrbs[i];
 
@@ -1232,8 +1236,8 @@
             } else if (orb.phase === 1) {
                 // Phase 1: Move away from player (0.1 sec)
                 if (dist > 0) {
-                    orb.x -= (dx / dist) * CONFIG.XP_ATTRACT_SPEED * 0.1;
-                    orb.y -= (dy / dist) * CONFIG.XP_ATTRACT_SPEED * 0.1;
+                    orb.x -= (dx / dist) * CONFIG.XP_ATTRACT_SPEED * 0.1 * timeFactor;
+                    orb.y -= (dy / dist) * CONFIG.XP_ATTRACT_SPEED * 0.1 * timeFactor;
                 }
                 if (orb.timer >= 0.1) {
                     orb.phase = 2;
@@ -1241,8 +1245,8 @@
             } else {
                 // Phase 2: Fly toward player
                 if (dist > 0) {
-                    orb.x += (dx / dist) * CONFIG.XP_ATTRACT_SPEED;
-                    orb.y += (dy / dist) * CONFIG.XP_ATTRACT_SPEED;
+                    orb.x += (dx / dist) * CONFIG.XP_ATTRACT_SPEED * timeFactor;
+                    orb.y += (dy / dist) * CONFIG.XP_ATTRACT_SPEED * timeFactor;
                 }
             }
 
@@ -1406,7 +1410,7 @@
 
         // Move bars down at same speed as background
         if (!game.barWinnerType) {
-            game.barY += 1;
+            game.barY += 1 * game.deltaTime * 60;
         }
 
         // Check if we have a winner (two bars at 0)
