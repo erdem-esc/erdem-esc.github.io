@@ -1852,7 +1852,7 @@
         for (const explosion of game.explosions) {
             const frames = explosionFrames[explosion.type];
             if (frames && frames.length > 0) {
-                const frameIndex = isMobile ? Math.min(explosion.frame, 1) : Math.min(explosion.frame, frames.length - 1);
+                const frameIndex = Math.min(explosion.frame, frames.length - 1);
                 const img = frames[frameIndex];
                 const size = explosion.size;
                 ctx.drawImage(img, explosion.x - size/2, explosion.y - size/2, size, size);
