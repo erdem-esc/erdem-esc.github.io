@@ -965,16 +965,6 @@
     function gameLoop(currentTime) {
         if (!game.running) return;
 
-        // Frame rate limiting for mobile
-        if (isMobile) {
-            const elapsed = currentTime - lastFrameTime;
-            if (elapsed < frameInterval) {
-                requestAnimationFrame(gameLoop);
-                return;
-            }
-            lastFrameTime = currentTime - (elapsed % frameInterval);
-        }
-
         game.deltaTime = Math.min((currentTime - game.lastTime) / 1000, 0.1);
         game.lastTime = currentTime;
 
@@ -990,12 +980,14 @@
         updatePlayer();
         updateBullets();
         updateEnemies();
-        updateXPOrbs();
+        if (game.xpOrbs.length > 0) updateXPOrbs();
         updateAnimations();
-        updateExplosions();
-        updateBarAnimations();
-        updateBarSelection();
-        updateWinnerAnimation();
+        if (game.explosions.length > 0) updateExplosions();
+        if (game.barSelectionActive) {
+            updateBarAnimations();
+            updateBarSelection();
+            updateWinnerAnimation();
+        }
 
         // Scroll background slowly (no reset needed, render handles wrapping)
         game.backgroundY += 0.75 * game.deltaTime * 60;
@@ -1778,20 +1770,15 @@
                 const w = img.width * scale;
                 const h = img.height * scale;
 
-                // On mobile, skip flip transform for performance
-                if (isMobile) {
-                    ctx.drawImage(img, enemy.x - w/2, enemy.y - h/2, w, h);
-                } else {
-                    // Flip sprite based on movement direction (flip when moving right)
-                    const movingRight = game.player.x > enemy.x;
-                    ctx.save();
-                    ctx.translate(enemy.x, enemy.y);
-                    if (movingRight) {
-                        ctx.scale(-1, 1);
-                    }
-                    ctx.drawImage(img, -w/2, -h/2, w, h);
-                    ctx.restore();
+                // Flip sprite based on movement direction (flip when moving right)
+                const movingRight = game.player.x > enemy.x;
+                ctx.save();
+                ctx.translate(enemy.x, enemy.y);
+                if (movingRight) {
+                    ctx.scale(-1, 1);
                 }
+                ctx.drawImage(img, -w/2, -h/2, w, h);
+                ctx.restore();
             } else {
                 ctx.fillStyle = CONFIG.COLOR_ENEMY;
                 ctx.beginPath();
@@ -1844,18 +1831,13 @@
             const w = img.width * scale;
             const h = img.height * scale;
 
-            // On mobile, skip flip transform for performance
-            if (isMobile) {
-                ctx.drawImage(img, game.player.x - w/2, game.player.y - h/2, w, h);
-            } else {
-                ctx.save();
-                ctx.translate(game.player.x, game.player.y);
-                if (game.player.facingLeft) {
-                    ctx.scale(-1, 1); // Flip horizontally
-                }
-                ctx.drawImage(img, -w/2, -h/2, w, h);
-                ctx.restore();
+            ctx.save();
+            ctx.translate(game.player.x, game.player.y);
+            if (game.player.facingLeft) {
+                ctx.scale(-1, 1); // Flip horizontally
             }
+            ctx.drawImage(img, -w/2, -h/2, w, h);
+            ctx.restore();
         } else {
             ctx.fillStyle = CONFIG.COLOR_PLAYER;
             ctx.beginPath();
