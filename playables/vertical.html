@@ -382,6 +382,14 @@
     }
 
     // ============================================
+    // Mobile Detection & Performance
+    // ============================================
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const targetFPS = isMobile ? 30 : 60;
+    const frameInterval = 1000 / targetFPS;
+    let lastFrameTime = 0;
+
+    // ============================================
     // Configuration
     // ============================================
     const CONFIG = {
@@ -721,8 +729,8 @@
             scale = screenWidth / DESIGN_WIDTH;
         }
 
-        // Use device pixel ratio for crisp rendering
-        const dpr = window.devicePixelRatio || 1;
+        // Use device pixel ratio for crisp rendering (limit to 1 on mobile for performance)
+        const dpr = isMobile ? 1 : (window.devicePixelRatio || 1);
 
         // Set canvas to design resolution * device pixel ratio
         game.canvas.width = DESIGN_WIDTH * dpr;
@@ -956,6 +964,16 @@
     // ============================================
     function gameLoop(currentTime) {
         if (!game.running) return;
+
+        // Frame rate limiting for mobile
+        if (isMobile) {
+            const elapsed = currentTime - lastFrameTime;
+            if (elapsed < frameInterval) {
+                requestAnimationFrame(gameLoop);
+                return;
+            }
+            lastFrameTime = currentTime - (elapsed % frameInterval);
+        }
 
         game.deltaTime = Math.min((currentTime - game.lastTime) / 1000, 0.1);
         game.lastTime = currentTime;
@@ -1756,15 +1774,20 @@
                 const w = img.width * scale;
                 const h = img.height * scale;
 
-                // Flip sprite based on movement direction (flip when moving right)
-                const movingRight = game.player.x > enemy.x;
-                ctx.save();
-                ctx.translate(enemy.x, enemy.y);
-                if (movingRight) {
-                    ctx.scale(-1, 1);
+                // On mobile, skip flip transform for performance
+                if (isMobile) {
+                    ctx.drawImage(img, enemy.x - w/2, enemy.y - h/2, w, h);
+                } else {
+                    // Flip sprite based on movement direction (flip when moving right)
+                    const movingRight = game.player.x > enemy.x;
+                    ctx.save();
+                    ctx.translate(enemy.x, enemy.y);
+                    if (movingRight) {
+                        ctx.scale(-1, 1);
+                    }
+                    ctx.drawImage(img, -w/2, -h/2, w, h);
+                    ctx.restore();
                 }
-                ctx.drawImage(img, -w/2, -h/2, w, h);
-                ctx.restore();
             } else {
                 ctx.fillStyle = CONFIG.COLOR_ENEMY;
                 ctx.beginPath();
@@ -1773,11 +1796,12 @@
             }
         }
 
-        // Draw explosions
+        // Draw explosions (simplified on mobile - two frames only)
         for (const explosion of game.explosions) {
             const frames = explosionFrames[explosion.type];
-            if (frames && frames.length > 0 && explosion.frame < frames.length) {
-                const img = frames[explosion.frame];
+            if (frames && frames.length > 0) {
+                const frameIndex = isMobile ? Math.min(explosion.frame, 1) : Math.min(explosion.frame, frames.length - 1);
+                const img = frames[frameIndex];
                 const size = explosion.size;
                 ctx.drawImage(img, explosion.x - size/2, explosion.y - size/2, size, size);
             }
@@ -1816,13 +1840,18 @@
             const w = img.width * scale;
             const h = img.height * scale;
 
-            ctx.save();
-            ctx.translate(game.player.x, game.player.y);
-            if (game.player.facingLeft) {
-                ctx.scale(-1, 1); // Flip horizontally
+            // On mobile, skip flip transform for performance
+            if (isMobile) {
+                ctx.drawImage(img, game.player.x - w/2, game.player.y - h/2, w, h);
+            } else {
+                ctx.save();
+                ctx.translate(game.player.x, game.player.y);
+                if (game.player.facingLeft) {
+                    ctx.scale(-1, 1); // Flip horizontally
+                }
+                ctx.drawImage(img, -w/2, -h/2, w, h);
+                ctx.restore();
             }
-            ctx.drawImage(img, -w/2, -h/2, w, h);
-            ctx.restore();
         } else {
             ctx.fillStyle = CONFIG.COLOR_PLAYER;
             ctx.beginPath();
