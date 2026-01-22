@@ -1142,9 +1142,6 @@
     function killEnemy(index) {
         const enemy = game.enemies[index];
 
-        // Play death sound
-        playSound('explosion');
-
         // Spawn XP orb - clamp to visible area
         const padding = 10;
         game.xpOrbs.push({
