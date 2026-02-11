@@ -6,7 +6,7 @@
   <title>esc</title>
 
   <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Quicksand:wght@400;600&display=swap" rel="stylesheet">
 
   <!-- Favicon -->
   <link rel="icon" href="logo1-512-nobg.png" type="image/png" />
@@ -20,28 +20,121 @@
 
     html, body {
       width: 100%;
-      height: 100%;
+      height: 100vh;
       font-family: 'Lilita One', cursive;
       background: black;
       color: #ccc;
       display: flex;
       flex-direction: column;
-      justify-content: space-between; /* top logo, bottom table */
+      justify-content: space-between;
       align-items: center;
-      padding: 20px 0;
+      padding: 10px 0;
+      overflow: hidden;
     }
 
     .logo-container {
-      flex-grow: 1; /* keeps logo centered vertically */
       display: flex;
       justify-content: center;
-      align-items: center;
+      margin-top: 0;
     }
 
     .logo-container img {
-      width: 50vw;
-      max-width: 400px;
+      width: 8vw;
       height: auto;
+    }
+
+    /* Game section */
+    .game-section {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      max-width: 1000px;
+      padding: 10px 20px;
+      min-height: 0;
+    }
+
+    .game-table {
+      width: auto;
+      border-collapse: collapse;
+    }
+
+    .game-table td {
+      vertical-align: middle;
+      padding: 20px;
+    }
+
+    .game-table td.game-info {
+      text-align: center;
+      max-width: 33vw;
+    }
+
+    .game-table td.game-screenshot {
+      text-align: center;
+    }
+
+    .game-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .game-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 18px;
+      background: #333;
+    }
+
+    .game-title {
+      font-size: 3em;
+      color: #fff;
+    }
+
+    .game-description {
+      font-size: 1em;
+      line-height: 1.4;
+      color: #ccc;
+      margin-bottom: 20px;
+      margin-left: 20px;
+      margin-right: 20px;
+      font-family: 'Quicksand', sans-serif;
+    }
+
+    .store-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .store-button {
+      display: block;
+      transition: opacity 0.3s ease;
+    }
+
+    .store-button:hover {
+      opacity: 0.85;
+    }
+
+    .store-button img {
+      height: 50px;
+      width: auto;
+    }
+
+    .phone-frame {
+      position: relative;
+      display: inline-block;
+    }
+
+    .phone-frame img {
+      height: 65vh;
+      width: calc(65vh * 9 / 18);
+      border-radius: 30px;
+      border: 8px solid #333;
+      object-fit: cover;
     }
 
     /* Footer table */
@@ -50,11 +143,11 @@
       max-width: 600px;
       border-collapse: collapse;
       color: #ccc;
-      font-size: 0.95em; /* doubled from previous 0.475em */
+      font-family: 'Quicksand', sans-serif;
     }
 
     .footer-table td {
-      padding: 10px 0;
+      padding: 5px 0;
       vertical-align: middle;
     }
 
@@ -72,9 +165,17 @@
     .footer-table td.center {
       text-align: center;
       padding-top: 10px;
-      font-size: 0.5em; /* half of others */
+      font-size: 0.6em;
       font-weight: normal;
       color: #aaa;
+    }
+
+    .footer-table .row1 {
+      font-size: 1.0em;
+    }
+
+    .footer-table .row2 {
+      font-size: 0.8em;
     }
 
     .footer-table a {
@@ -90,20 +191,88 @@
 
     /* Mobile-specific styling */
     @media (max-width: 600px) {
+      html, body {
+        height: 100vh;
+        overflow: hidden;
+        padding: 5px 0;
+      }
+
       .logo-container img {
-        width: 70vw;
-        max-width: 250px;
+        width: 15vw;
+      }
+
+      .game-section {
+        padding: 5px 10px;
+      }
+
+      .game-table {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .game-table tr {
+        display: flex;
+        flex-direction: column-reverse;
+      }
+
+      .game-table td {
+        display: block;
+        width: 100%;
+        padding: 5px;
+      }
+
+      .game-table td.game-info {
+        max-width: 100%;
+      }
+
+      .phone-frame img {
+        height: 35vh;
+        width: calc(35vh * 9 / 18);
+      }
+
+      .game-header {
+        margin-bottom: 8px;
+      }
+
+      .game-title {
+        font-size: 1.5em;
+      }
+
+      .game-icon {
+        width: 50px;
+        height: 50px;
+      }
+
+      .game-description {
+        font-size: 0.75em;
+        line-height: 1.3;
+        margin-bottom: 10px;
+        margin-left: 10px;
+        margin-right: 10px;
+      }
+
+      .store-buttons {
+        flex-direction: row;
+        gap: 10px;
+      }
+
+      .store-button img {
+        height: 35px;
       }
 
       .footer-table {
-        font-size: 0.85em; /* slightly smaller for mobile */
+        font-size: 0.8em;
+      }
+
+      .footer-table td {
+        padding: 2px 0;
       }
 
       .footer-table td.left,
       .footer-table td.right,
       .footer-table td.center {
         text-align: center;
-        padding-top: 10px;
+        padding: 2px 10px;
         font-weight: normal;
       }
     }
@@ -116,13 +285,43 @@
     <img src="logo1-2048-nobg.png" alt="Logo" />
   </div>
 
+  <!-- Game section -->
+  <div class="game-section">
+    <table class="game-table">
+      <tr>
+        <td class="game-info">
+          <div class="game-header">
+            <img src="ps-icon.png" alt="Portal Survivor" class="game-icon" />
+            <span class="game-title">Portal Survivor</span>
+          </div>
+          <p class="game-description">
+            Portal Survivor blends high-energy action with roguelite progression. Dodge, shoot, and unleash powerful skill combos as you survive swarms of enemies and take down colossal bosses. No two runs are ever the same.
+          </p>
+          <div class="store-buttons">
+            <a href="https://apps.apple.com/gb/app/portal-survivor/id6754314383" class="store-button">
+              <img src="appstore.svg" alt="Download on the App Store" />
+            </a>
+            <a href="https://play.google.com/store/apps/details?id=com.escape.portalsurvivor" class="store-button">
+              <img src="googleplay.png" alt="Get it on Google Play" />
+            </a>
+          </div>
+        </td>
+        <td class="game-screenshot">
+          <div class="phone-frame">
+            <img src="ps-snip.png" alt="Portal Survivor Screenshot" />
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
   <!-- Footer table anchored at bottom center -->
   <table class="footer-table">
-    <tr>
+    <tr class="row1">
       <td class="left"><a href="mailto:info@esc.gs">Contact Us</a></td>
       <td class="right"><a href="https://www.linkedin.com/company/escgames/">LinkedIn</a></td>
     </tr>
-    <tr>
+    <tr class="row2">
       <td class="left"><a href="privacy.html">Privacy Policy</a></td>
       <td class="right"><a href="terms.html">Terms of Use</a></td>
     </tr>
