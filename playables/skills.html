@@ -465,9 +465,9 @@
 
         // Skills available at each upgrade level
         SKILLS_BY_LEVEL: {
-            1: ['explosion', 'chain', 'minigun'],
-            2: ['splitshot', 'rapid_fire', 'katana'],
-            3: ['lazer', 'pierce'] // + random unused
+            1: ['explosion', 'lazer', 'katana'],
+            2: ['chain', 'pierce', 'splitshot'],
+            3: ['minigun', 'rapid_fire'] // + random unused
         },
 
         // Sprite paths
@@ -1036,7 +1036,7 @@
         // Calculate fire rate based on skills
         let fireRate = CONFIG.BULLET_FIRE_RATE;
         if (hasSkill('rapid_fire')) fireRate *= 0.5; // 2x faster
-        if (hasSkill('minigun')) fireRate *= 0.4; // ~2.5x faster
+        if (hasSkill('minigun')) fireRate *= 0.6; // ~1.7x faster
 
         // Auto-fire
         game.fireTimer += game.deltaTime;
@@ -1388,9 +1388,9 @@
             // First and second upgrade: show fixed skills for that level
             skillsToShow = CONFIG.SKILLS_BY_LEVEL[upgradeNumber];
         } else {
-            // Third upgrade: lazer, pierce + random unused
+            // Third upgrade: minigun, rapid_fire + random unused
             const baseSkills = CONFIG.SKILLS_BY_LEVEL[3];
-            const allSkills = ['explosion', 'chain', 'minigun', 'splitshot', 'rapid_fire', 'katana', 'lazer', 'pierce'];
+            const allSkills = ['explosion', 'chain', 'katana', 'lazer', 'pierce', 'splitshot', 'minigun', 'rapid_fire'];
             const unusedSkills = allSkills.filter(s => !game.selectedSkills.includes(s) && !baseSkills.includes(s));
             const randomUnused = unusedSkills.length > 0 ? [unusedSkills[Math.floor(Math.random() * unusedSkills.length)]] : [];
             skillsToShow = [...baseSkills, ...randomUnused];
