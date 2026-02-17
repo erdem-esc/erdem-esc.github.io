@@ -1036,7 +1036,7 @@
         // Calculate fire rate based on skills
         let fireRate = CONFIG.BULLET_FIRE_RATE;
         if (hasSkill('rapid_fire')) fireRate *= 0.5; // 2x faster
-        if (hasSkill('minigun')) fireRate *= 0.3; // ~3x faster
+        if (hasSkill('minigun')) fireRate *= 0.4; // ~2.5x faster
 
         // Auto-fire
         game.fireTimer += game.deltaTime;
@@ -1146,7 +1146,7 @@
                 pierce: hasSkill('pierce') || isLazer, // Lazer always pierces
                 chain: hasSkill('chain'),
                 chainCount: 0, // Track number of chains (max 2)
-                splitshot: hasSkill('splitshot'),
+                splitshot: hasSkill('splitshot') && !hasSkill('chain'), // Chain bullets don't split
                 hitEnemies: [] // Track which enemies this bullet has hit (for pierce/chain)
             };
 
@@ -1172,7 +1172,7 @@
                         pierce: hasSkill('pierce') || isLazer,
                         chain: hasSkill('chain'),
                         chainCount: 0,
-                        splitshot: hasSkill('splitshot'),
+                        splitshot: hasSkill('splitshot') && !hasSkill('chain'), // Chain bullets don't split
                         hitEnemies: []
                     });
                 }
@@ -1624,7 +1624,7 @@
 
                     // Handle chain - redirect bullet to nearest enemy (chains twice, hits 3 total)
                     let chainedToEnemy = false;
-                    if (bullet.chain && bullet.chainCount < 5) {
+                    if (bullet.chain && bullet.chainCount < 3) {
                         let nearestChainEnemy = null;
                         let nearestChainIndex = -1;
                         let nearestDist = Infinity;
