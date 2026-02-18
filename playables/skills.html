@@ -710,6 +710,10 @@
         // Timers
         fireTimer: 0,
         spawnTimer: 0,
+        lastCoinSound: 0,
+
+        // UI state
+        uiDirty: false,
 
         // Animation state
         playerAnimTime: 0,
@@ -1003,7 +1007,10 @@
         }
     }
 
+    let collectHintHidden = false;
     function hideCollectHint() {
+        if (collectHintHidden) return;
+        collectHintHidden = true;
         document.getElementById('collect-hint').style.display = 'none';
     }
 
@@ -1057,6 +1064,12 @@
         }
 
         checkCollisions();
+
+        // Batched UI update - once per frame instead of per XP pickup
+        if (game.uiDirty) {
+            updateUI();
+            game.uiDirty = false;
+        }
     }
 
     function getSpawnRate() {
@@ -1347,9 +1360,16 @@
 
     function collectXP() {
         game.xp++;
-        playSound('coin');
+        game.uiDirty = true;
+
+        // Debounce coin sound - max once per 100ms
+        const now = performance.now();
+        if (now - game.lastCoinSound > 100) {
+            playSound('coin');
+            game.lastCoinSound = now;
+        }
+
         hideCollectHint();
-        updateUI();
 
         // Level up with different XP thresholds
         let xpNeeded;
